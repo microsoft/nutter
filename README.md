@@ -1,6 +1,6 @@
 # Nutter
 
-Testing Framework
+Testing Framework for Databricks Notebooks
 
 # Contributing
 
