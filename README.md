@@ -134,7 +134,7 @@ Install the Nutter CLI from the source.
 ``` bash
 pip install setuptools
 git clone https://github.com/microsoft/nutter
-cd az-seri/nutter
+cd nutter
 python setup.py bdist_wheel
 cd dist
 pip install nutter-<LATEST_VERSION>-py3-none-any.whl
