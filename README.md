@@ -133,7 +133,7 @@ Install the Nutter CLI from the source.
 
 ``` bash
 pip install setuptools
-git clone https://patientcareanalytics.visualstudio.com/eICU/_git/az-seri
+git clone https://github.com/microsoft/nutter
 cd az-seri/nutter
 python setup.py bdist_wheel
 cd dist
