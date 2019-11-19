@@ -75,7 +75,8 @@ class ConsoleEventHandler(EventHandler):
 
     def _handle_testsexecuted(self, event):
         return '{} Success:{} {}'.format(event.data.notebook_path,
-                event.data.success, event.data.notebook_run_page_url)
+                                         event.data.success,
+                                         event.data.notebook_run_page_url)
 
     def _handle_testsexecutionrequest(self, event):
         return 'Execution request: {}'.format(event.data)
@@ -83,7 +84,8 @@ class ConsoleEventHandler(EventHandler):
     def _handle_testscheduling(self, event):
         num_of_tests = self._num_of_test_to_execute()
         self._scheduled_tests += 1
-        return '{} of {} tests scheduled for execution'.format(self._scheduled_tests, num_of_tests)
+        return '{} of {} tests scheduled for execution'.format(self._scheduled_tests,
+                                                               num_of_tests)
 
     def _handle_testsexecutionresult(self, event):
         num_of_tests = self._num_of_test_to_execute()

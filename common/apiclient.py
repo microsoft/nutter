@@ -95,8 +95,9 @@ class DatabricksAPIClient(object):
             lcs = utils.recursive_find(
                 output, ['metadata', 'state', 'life_cycle_state'])
 
-            #As per https://docs.azuredatabricks.net/api/latest/jobs.html#jobsrunlifecyclestate
-            # all these are terminal states
+            # As per:
+            # https://docs.azuredatabricks.net/api/latest/jobs.html#jobsrunlifecyclestate
+            # All these are terminal states
             if lcs == 'TERMINATED' or lcs == 'SKIPPED' or lcs == 'INTERNAL_ERROR':
                 return lcs, output
             time.sleep(1)
@@ -106,7 +107,9 @@ class DatabricksAPIClient(object):
         run_page_url = utils.recursive_find(
             output, ['metadata', 'run_page_url'])
         raise TimeOutException(
-            "Timeout while waiting for the result of a test.\nCheck the status of the execution\nRun page URL: {}".format(run_page_url))
+            """ Timeout while waiting for the result of a test.\n
+                Check the status of the execution\n
+                Run page URL: {} """.format(run_page_url))
 
     def __get_notebook_task(self, path, params):
         ntask = {}

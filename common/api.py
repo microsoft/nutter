@@ -246,13 +246,15 @@ class TestNamePatternMatcher(object):
         try:
             # * is an invalid regex in python
             # however, we want to treat it as no filter
-            if pattern == '*' or pattern == None or pattern == '':
+            if pattern == '*' or pattern is None or pattern == '':
                 self._pattern = None
                 return
             re.compile(pattern)
         except re.error as ex:
+            logging.debug('Pattern could not be compiled. {}'.format(ex))
             raise ValueError(
-                "The pattern provided is invalid. The pattern must start with an alphanumeric character")
+                """ The pattern provided is invalid.
+                     The pattern must start with an alphanumeric character """)
         self._pattern = pattern
 
     def filter_by_pattern(self, test_notebooks):
@@ -278,7 +280,7 @@ class ExecutionResultEventData():
         notebook_run_page_url = exec_results.notebook_run_page_url
         notebook_path = exec_results.notebook_path
         try:
-          success = not exec_results.is_any_error
+            success = not exec_results.is_any_error
         except Exception as ex:
             logging.debug("Error while creating the ExecutionResultEventData {}", ex)
             success = False

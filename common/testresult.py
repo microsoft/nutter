@@ -80,6 +80,6 @@ class TestResult:
             return self.test_name == other.test_name \
                 and self.passed == other.passed \
                 and type(self.exception) == type(other.exception) \
-                and str(self.exception) == str(other.exception) 
+                and str(self.exception) == str(other.exception)
 
         return False

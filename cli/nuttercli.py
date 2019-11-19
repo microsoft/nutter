@@ -50,10 +50,18 @@ class NutterCLI(object):
         self._set_nutter(debug)
         super().__init__()
 
-    def run(self, test_pattern, cluster_id, timeout=120, junit_report=False, tags_report=False, max_parallel_tests=1, recursive=False):
+    def run(self, test_pattern, cluster_id,
+            timeout=120, junit_report=False,
+            tags_report=False, max_parallel_tests=1,
+            recursive=False):
         try:
-            logging.debug("Running tests. test_pattern: {} cluster_id: {} timeout: {} junit_report: {} max_parallel_tests: {} tags_report: {}  recursive:{} ".format(
-                test_pattern, cluster_id, timeout, junit_report, max_parallel_tests, tags_report, recursive))
+            logging.debug(""" Running tests. test_pattern: {} cluster_id: {} timeout: {}
+                               junit_report: {} max_parallel_tests: {}
+                               tags_report: {}  recursive:{} """
+                          .format(test_pattern, cluster_id, timeout,
+                                  junit_report, max_parallel_tests,
+                                  tags_report, recursive))
+
             logging.debug("Executing test(s): {}".format(test_pattern))
 
             if self._is_a_test_pattern(test_pattern):
@@ -137,7 +145,8 @@ class NutterCLI(object):
                 return False
             return True
         logging.Fatal(
-            'Invalid argument. The value must be the full path to the test or a pattern')
+            """ Invalid argument.
+                 The value must be the full path to the test or a pattern """)
 
     def _print_cli_header(self):
         print(get_cli_header())
@@ -161,7 +170,9 @@ class NutterCLI(object):
         return 'Nutter Version {}'.format(version)
 
     def _print_config_error_and_exit(self):
-        print('Invalid configuration.\nDATABRICKS_HOST and DATABRICKS_TOKEN environment variables are not set')
+        print(""" Invalid configuration.\n
+                  DATABRICKS_HOST and DATABRICKS_TOKEN
+                   environment variables are not set """)
         exit(1)
 
     def _set_debugging(self, debug, log_to_file):
@@ -171,7 +182,9 @@ class NutterCLI(object):
                 log_name = 'nutter-exec-{0:%Y.%m.%d.%H%M%S%f}.log'.format(
                     datetime.datetime.utcnow())
             logging.basicConfig(
-                filename=log_name, format="%(asctime)s:%(levelname)s:%(message)s", level=logging.DEBUG)
+                filename=log_name,
+                format="%(asctime)s:%(levelname)s:%(message)s",
+                level=logging.DEBUG)
 
 
 def main():

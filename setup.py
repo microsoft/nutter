@@ -1,5 +1,4 @@
 import setuptools
-import datetime
 import cli.nuttercli as nuttercli
 
 with open("README.md", "r") as fh:
