@@ -1,3 +1,7 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
 
 def recursive_find(dict_instance, keys):
     if not isinstance(keys, list):

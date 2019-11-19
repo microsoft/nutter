@@ -1,6 +1,9 @@
-from json import JSONEncoder
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+
 from .pickleserializable import PickleSerializable
-import json
 import pickle
 import base64
 
@@ -15,15 +18,16 @@ class TestResults(PickleSerializable):
         self.total_execution_time = 0
 
     def append(self, testresult):
-        if isinstance(testresult, TestResult) == False:
+        if not isinstance(testresult, TestResult):
             raise TypeError("Can only append TestResult to TestResults")
- 
+
         self.results.append(testresult)
         self.test_cases = self.test_cases + 1
-        if (testresult.passed == False):
+        if (not testresult.passed):
             self.num_failures = self.num_failures + 1
 
-        self.total_execution_time = self.total_execution_time + testresult.execution_time
+        total_execution_time = self.total_execution_time + testresult.execution_time
+        self.total_execution_time = total_execution_time
 
     def serialize(self):
         bin_data = pickle.dumps(self)
@@ -33,20 +37,20 @@ class TestResults(PickleSerializable):
         bin_str = pickle_string.encode("utf-8")
         decoded_bin_data = base64.decodebytes(bin_str)
         return pickle.loads(decoded_bin_data)
-    
+
     def passed(self):
         for item in self.results:
-            if item.passed == False:
+            if not item.passed:
                 return False
         return True
 
     def __eq__(self, other):
-        if isinstance(self, other.__class__) == False:
+        if not isinstance(self, other.__class__):
             return False
         if len(self.results) != len(other.results):
             return False
         for item in other.results:
-            if self.__item_in_list_equalto(item) == False:
+            if not self.__item_in_list_equalto(item):
                 return False
 
         return True
@@ -59,8 +63,10 @@ class TestResults(PickleSerializable):
         return False
 
 class TestResult:
-    def __init__(self, test_name, passed, execution_time, tags, exception = None, stack_trace = ""):
-        if (isinstance(tags, list)) == False:
+    def __init__(self, test_name, passed,
+                 execution_time, tags, exception=None, stack_trace=""):
+
+        if not isinstance(tags, list):
             raise ValueError("tags must be a list")
         self.passed = passed
         self.exception = exception

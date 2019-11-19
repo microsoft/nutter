@@ -1,11 +1,17 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+
 from . import utils
-from abc import abstractmethod, ABCMeta
-from .testresult import TestResults, TestResult
+from abc import ABCMeta
+from .testresult import TestResults
 import logging
 
 
 class ExecuteNotebookResult(object):
-    def __init__(self, life_cycle_state, notebook_path, notebook_result, notebook_run_page_url):
+    def __init__(self, life_cycle_state, notebook_path,
+                 notebook_result, notebook_run_page_url):
         self.task_result_state = life_cycle_state
         self.notebook_path = notebook_path
         self.notebook_result = notebook_result
@@ -21,14 +27,13 @@ class ExecuteNotebookResult(object):
             job_output, ['metadata', 'run_page_url'])
         notebook_result = NotebookOutputResult.from_job_output(job_output)
 
-        return cls(life_cycle_state, notebook_path, notebook_result, notebook_run_page_url)
+        return cls(life_cycle_state, notebook_path,
+                   notebook_result, notebook_run_page_url)
 
     @property
     def is_error(self):
-        # the assumption is that the task is an terminal state
-        # this code should be be reached when the task is running as it must be in terminal state or
-        # the api should've timedout.
-        # In this context, success state must be TERMINATED as all the others are considered failures
+        # The assumption is that the task is an terminal state
+        # Success state must be TERMINATED all the others are considered failures
         return self.task_result_state != 'TERMINATED'
 
     @property
@@ -72,7 +77,7 @@ class NotebookOutputResult(object):
     @property
     def is_error(self):
         # https://docs.azuredatabricks.net/dev-tools/api/latest/jobs.html#jobsrunresultstate
-        return self.result_state != 'SUCCESS' and self.is_run_from_notebook == False
+        return self.result_state != 'SUCCESS' and not self.is_run_from_notebook
 
     @property
     def is_run_from_notebook(self):

@@ -1,3 +1,8 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+
 import logging
 import sys
 from common.api import NutterStatusEvents
@@ -22,7 +27,7 @@ class ConsoleEventHandler(EventHandler):
             event_instance = event_queue.get()
             if self._debug:
                 logging.debug(
-                        'Message from queue: {}'.format(event_instance))
+                    'Message from queue: {}'.format(event_instance))
                 return
             output = self._get_output(event_instance)
             self._print_output(output)
@@ -69,7 +74,8 @@ class ConsoleEventHandler(EventHandler):
         return '{} tests found'.format(event.data)
 
     def _handle_testsexecuted(self, event):
-        return '{} Success:{} {}'.format(event.data.notebook_path, event.data.success, event.data.notebook_run_page_url)
+        return '{} Success:{} {}'.format(event.data.notebook_path,
+                event.data.success, event.data.notebook_run_page_url)
 
     def _handle_testsexecutionrequest(self, event):
         return 'Execution request: {}'.format(event.data)

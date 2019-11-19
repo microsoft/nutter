@@ -1,3 +1,8 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+
 import uuid
 import time
 from databricks_api import DatabricksAPI
@@ -24,12 +29,14 @@ class DatabricksAPIClient(object):
 
         if config is None:
             raise InvalidConfigurationException
-        #TODO: remove the dependency with this API, an instead use httpclient/requests
+
+        # TODO: remove the dependency with this API, an instead use httpclient/requests
         db = DatabricksAPI(host=config.host,
                            token=config.token)
         self.inner_dbclient = db
-        #the retrier uses the recommended defaults
-        #https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/jobs
+
+        # The retrier uses the recommended defaults
+        # https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/jobs
         self._retrier = HTTPRetrier()
 
     def list_notebooks(self, path):
@@ -47,7 +54,8 @@ class DatabricksAPIClient(object):
 
         return workspace_path_obj
 
-    def execute_notebook(self, notebook_path, cluster_id, notebook_params=None, timeout=120):
+    def execute_notebook(self, notebook_path, cluster_id,
+                         notebook_params=None, timeout=120):
         if not notebook_path:
             raise ValueError("empty path")
         if not cluster_id:

@@ -1,3 +1,8 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+
 import os
 from abc import abstractmethod, ABCMeta
 
@@ -5,9 +10,7 @@ def get_auth_config():
     """
     """
 
-    providers = (
-            EnvVariableAuthConfigProvider(),
-            )
+    providers = (EnvVariableAuthConfigProvider(),)
 
     for provider in providers:
         config = provider.get_auth_config()

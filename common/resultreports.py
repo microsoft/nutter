@@ -1,6 +1,9 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
 
 from abc import abstractmethod, ABCMeta
-from . import apiclient
 from .testresult import TestResults
 from junit_xml import TestSuite, TestCase
 import datetime
@@ -47,7 +50,7 @@ class TagsReportRow(object):
 
     def _to_tag_string(self, tags):
         logging.debug(tags)
-        if tags  is None:
+        if tags is None:
             return ''
         value = ''
         for tag in tags:
@@ -55,7 +58,10 @@ class TagsReportRow(object):
         return value
 
     def to_string(self):
-        return '{},{},{},{},{}\n'.format(self.tags, self.notebook_name, self.test_name, self.passed_str, self.duration)
+        str_value = '{},{},{},{},{}\n'.format(
+                    self.tags, self.notebook_name,
+                    self.test_name, self.passed_str, self.duration)
+        return str_value
 
 class TagsReportWriter(TestResultsReportWriter):
     def __init__(self):
@@ -65,7 +71,8 @@ class TagsReportWriter(TestResultsReportWriter):
     def add_result(self, notebook_path, test_result):
         self._validate_add_results(notebook_path, test_result)
 
-        new_rows = [TagsReportRow(notebook_path, test_result) for test_result in test_result.results]
+        new_rows = [TagsReportRow(notebook_path, test_result)
+                    for test_result in test_result.results]
         self._rows.extend(new_rows)
 
     def has_data(self):

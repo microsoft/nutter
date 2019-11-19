@@ -1,3 +1,7 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
 
 from common.apiclientresults import ExecuteNotebookResult
 import common.api as api

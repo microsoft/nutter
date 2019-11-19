@@ -1,20 +1,20 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+
 import fire
 import logging
 import os
-import sys
 import datetime
 
-from queue import Queue
 import common.api as api
 from common.apiclient import InvalidConfigurationException
-from common.apiclientresults import ExecuteNotebookResult
-from common.statuseventhandler import EventHandler, StatusEvent
-from common.api import NutterStatusEvents
 
 import common.resultsview as view
 from .eventhandlers import ConsoleEventHandler
 from .resultsvalidator import ExecutionResultsValidator
-from .reportsman import ReportWriterManager, ReportWriters, ReportWritersTypes
+from .reportsman import ReportWriters
 from . import reportsman as reports
 
 __version__ = '0.1.31'
@@ -42,7 +42,9 @@ class NutterCLI(object):
     def __init__(self, debug=False, log_to_file=False, version=False):
         self._logger = logging.getLogger('NutterCLI')
         self._handle_show_version(version)
-        #CLI only logger so the output is not dictated by the logging configuration of all the other components
+
+        # CLI only logger so the output is not dictated
+        # by the logging configuration of all the other components
         self._set_debugging(debug, log_to_file)
         self._print_cli_header()
         self._set_nutter(debug)

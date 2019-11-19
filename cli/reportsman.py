@@ -1,5 +1,9 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+
 import common.api as nutter_api
-from common.testresult import TestResults
 from enum import Enum
 from enum import IntEnum
 
