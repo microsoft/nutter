@@ -12,9 +12,9 @@ from common.testexecresults import TestExecResults
 
 def tag(the_tag):
     def tag_decorator(function):
-        if not isinstance(the_tag, list) and not isinstance(the_tag, str):
+        if isinstance(the_tag, list) == False and isinstance(the_tag, str) == False:
             raise ValueError("the_tag must be a string or a list")
-        if not str.startswith(function.__name__, "run_"):
+        if str.startswith(function.__name__, "run_") == False:
             raise ValueError("a tag may only decorate a run_ method")
 
         function.tag = the_tag
