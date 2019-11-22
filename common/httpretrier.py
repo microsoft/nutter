@@ -1,3 +1,7 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
 
 import logging
 from time import sleep
@@ -17,8 +21,10 @@ class HTTPRetrier(object):
         while retry:
             try:
                 retry = self._tries < self._max_retries
-                logging.debug('Executing function with HTTP retry policy. Max tries:{}  delay:{}'.format(
-                    self._max_retries, self._delay))
+                logging.debug(
+                    'Executing function with HTTP retry policy. Max tries:{}  delay:{}'
+                    .format(self._max_retries, self._delay))
+
                 return function(*args, **kwargs)
             except HTTPError as exc:
                 logging.debug("Error: {0}".format(str(exc)))
@@ -28,8 +34,8 @@ class HTTPRetrier(object):
                     if exc.response.status_code < 500:
                         raise
             if retry:
-                logging.debug("Retrying in {0}s, {1} of {2} retries ".format(str(waitfor),
-                                                                             str(self._tries+1),
-                                                                             str(self._max_retries)))
+                logging.debug(
+                    'Retrying in {0}s, {1} of {2} retries'
+                    .format(str(waitfor), str(self._tries+1), str(self._max_retries)))
                 sleep(waitfor)
             self._tries = self._tries + 1

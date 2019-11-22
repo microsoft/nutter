@@ -1,6 +1,9 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
 
 from common.apiclientresults import ExecuteNotebookResult
-import common.api as api
 from common.testresult import TestResults
 import logging
 
@@ -17,8 +20,8 @@ class ExecutionResultsValidator(object):
         if not isinstance(result, ExecuteNotebookResult):
             raise ValueError("Expected ExecuteNotebookResult")
         if result.is_error:
-            msg = 'The job is not in a successfull terminal state. Life cycle state:{}'.format(
-                result.task_result_state)
+            msg = """ The job is not in a successfull terminal state.
+                       Life cycle state:{} """.format(result.task_result_state)
             raise JobExecutionFailureException(message=msg)
         if result.notebook_result.is_error:
             msg = 'The notebook failed. result state:{}'.format(
@@ -33,8 +36,8 @@ class ExecutionResultsValidator(object):
             test_results = TestResults().deserialize(exit_output)
         except Exception as ex:
             logging.debug(ex)
-            msg = 'The Notebook exit output value is invalid or missing. Additional info: {}'.format(
-                str(ex))
+            msg = """ The Notebook exit output value is invalid or missing.
+                       Additional info: {} """.format(str(ex))
             raise InvalidNotebookOutputException(msg)
 
         for test_result in test_results.results:

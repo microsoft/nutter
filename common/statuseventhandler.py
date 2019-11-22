@@ -1,6 +1,11 @@
-from abc import abstractmethod, ABCMeta, ABC
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+
+from abc import abstractmethod, ABC
 from queue import Queue
-from threading import Thread, Event
+from threading import Thread
 from datetime import datetime
 from enum import Enum
 import logging
@@ -9,7 +14,7 @@ import logging
 class StatusEventsHandler(object):
     def __init__(self, handler):
         self._event_queue = Queue()
-        self._processor = Processor(handler, self._event_queue ,)
+        self._processor = Processor(handler, self._event_queue,)
 
         self._processor.daemon = True
         self._processor.start()

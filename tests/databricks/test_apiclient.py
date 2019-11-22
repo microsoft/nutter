@@ -1,3 +1,8 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+
 import pytest
 from common import apiclient as client
 from common.apiclient import DatabricksAPIClient

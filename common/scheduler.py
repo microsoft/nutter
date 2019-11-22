@@ -1,11 +1,12 @@
-import datetime
-import time
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+
 import threading
 import logging
 from threading import Thread
 from queue import Queue
-import pprint
-
 
 def get_scheduler(num_of_workers):
     return Scheduler(num_of_workers)
@@ -15,7 +16,7 @@ class Scheduler(object):
     def __init__(self, num_of_workers):
         if num_of_workers < 1 or num_of_workers > 15:
             raise ValueError(
-                'Number of workers is invalid. The value must greater than zero and less than 15')
+                'Number of workers is invalid. It must be a value bettwen 1 and 15')
         self._num_of_workers = num_of_workers
         self._in_queue = Queue()
         self._out_queue = Queue()
@@ -114,7 +115,8 @@ class FunctionHandler(Worker):
 
             except Exception as ex:
                 self._out_queue.put(FunctionResult(None, ex))
-                logging.debug('Function Handler. Exception in function. Error {} {}'.format(str(ex), ex is None))
+                logging.debug('Function Handler. Exception in function. Error {} {}'
+                              .format(str(ex), ex is None))
             finally:
                 self._in_queue.task_done()
         self.set_done()
