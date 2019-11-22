@@ -1,17 +1,19 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+
 from abc import abstractmethod, ABCMeta
 from .testresult import TestResults
 from . import scheduler
 from . import apiclient
-from junit_xml import TestSuite, TestCase
 from .resultreports import JunitXMLReportWriter, TestResultsReportWriter
 from .statuseventhandler import StatusEventsHandler
 
 import enum
 import logging
 
-import os
 import re
-import json
 import importlib
 
 
@@ -79,7 +81,7 @@ class Nutter(NutterApi):
             tests.append(test)
 
         self._add_status_event(
-                NutterStatusEvents.TestsListingResults, len(tests))
+            NutterStatusEvents.TestsListingResults, len(tests))
 
         return tests
 
@@ -94,7 +96,9 @@ class Nutter(NutterApi):
 
         return result
 
-    def run_tests(self, pattern, cluster_id, timeout=120, max_parallel_tests=1, recursive=False):
+    def run_tests(self, pattern, cluster_id,
+                  timeout=120, max_parallel_tests=1, recursive=False):
+
         self._add_status_event(NutterStatusEvents.TestExecutionRequest, pattern)
         root, pattern_to_match = self._get_root_and_pattern(pattern)
 
@@ -118,7 +122,7 @@ class Nutter(NutterApi):
         self._events_processor.wait()
 
     def _list_tests(self, path, recursive):
-        self._add_status_event(NutterStatusEvents.TestsListing,path)
+        self._add_status_event(NutterStatusEvents.TestsListing, path)
         workspace_objects = self.dbclient.list_objects(path)
 
         for notebook in workspace_objects.test_notebooks:
@@ -158,7 +162,8 @@ class Nutter(NutterApi):
 
         return root, valid_pattern
 
-    def _schedule_and_run(self, test_notebooks, cluster_id, max_parallel_tests, timeout):
+    def _schedule_and_run(self, test_notebooks, cluster_id,
+                          max_parallel_tests, timeout):
         func_scheduler = scheduler.get_scheduler(max_parallel_tests)
         for test_notebook in test_notebooks:
             self._add_status_event(
@@ -170,12 +175,13 @@ class Nutter(NutterApi):
         return self._run_and_await(func_scheduler)
 
     def _execute_notebook(self, test_notebook_path, cluster_id, timeout):
-        result = self.dbclient.execute_notebook(test_notebook_path, cluster_id, None, timeout)
-        self._add_status_event(
-                NutterStatusEvents.TestExecuted, ExecutionResultEventData.from_execution_results(result))
-        logging.debug(
-                'Executed: {}'.format(test_notebook_path))
+        result = self.dbclient.execute_notebook(test_notebook_path,
+                                                cluster_id, None, timeout)
+        self._add_status_event(NutterStatusEvents.TestExecuted,
+                               ExecutionResultEventData.from_execution_results(result))
+        logging.debug('Executed: {}'.format(test_notebook_path))
         return result
+
     def _run_and_await(self, func_scheduler):
         logging.debug('Scheduler run and wait.')
         func_results = func_scheduler.run_and_wait()
@@ -209,7 +215,8 @@ class TestNotebook(object):
         self.test_name = name.split("_")[1]
 
     def __eq__(self, obj):
-        return isinstance(obj, TestNotebook) and obj.name == self.name and obj.path == self.path
+        is_equal = obj.name == self.name and obj.path == self.path
+        return isinstance(obj, TestNotebook) and is_equal
 
     @classmethod
     def from_path(cls, path):
@@ -239,13 +246,15 @@ class TestNamePatternMatcher(object):
         try:
             # * is an invalid regex in python
             # however, we want to treat it as no filter
-            if pattern == '*' or pattern == None or pattern == '':
+            if pattern == '*' or pattern is None or pattern == '':
                 self._pattern = None
                 return
             re.compile(pattern)
         except re.error as ex:
+            logging.debug('Pattern could not be compiled. {}'.format(ex))
             raise ValueError(
-                "The pattern provided is invalid. The pattern must start with an alphanumeric character")
+                """ The pattern provided is invalid.
+                     The pattern must start with an alphanumeric character """)
         self._pattern = pattern
 
     def filter_by_pattern(self, test_notebooks):
@@ -271,7 +280,7 @@ class ExecutionResultEventData():
         notebook_run_page_url = exec_results.notebook_run_page_url
         notebook_path = exec_results.notebook_path
         try:
-          success = not exec_results.is_any_error
+            success = not exec_results.is_any_error
         except Exception as ex:
             logging.debug("Error while creating the ExecutionResultEventData {}", ex)
             success = False

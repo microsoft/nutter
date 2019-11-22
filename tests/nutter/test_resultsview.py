@@ -1,3 +1,8 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+
 import json
 import pytest
 from common.resultsview import RunCommandResultsView, TestCaseResultView, ListCommandResultView, ListCommandResultsView

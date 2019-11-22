@@ -1,3 +1,8 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+
 from runtime.nutterfixture import NutterFixture
 
 class TestNutterFixtureBuilder():

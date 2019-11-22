@@ -1,3 +1,8 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+
 from abc import abstractmethod, ABCMeta
 
 class PickleSerializable():

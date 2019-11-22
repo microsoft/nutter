@@ -1,3 +1,8 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+
 import pytest
 import enum
 from common.statuseventhandler import StatusEventsHandler, EventHandler, StatusEvent

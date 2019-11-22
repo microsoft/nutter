@@ -1,3 +1,8 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+import logging
 from abc import abstractmethod, ABCMeta
 from .apiclientresults import ExecuteNotebookResult
 from .testresult import TestResults, TestResult
@@ -124,7 +129,6 @@ class RunCommandResultView(ResultsView):
         self.notebook_result_state = result.notebook_result.result_state
         self.notebook_run_page_url = result.notebook_run_page_url
 
-
         self.raw_notebook_output = result.notebook_result.exit_output
         t_results = self._get_test_results(result)
         self.test_cases_views = []
@@ -135,9 +139,9 @@ class RunCommandResultView(ResultsView):
         super().__init__()
 
     def _get_test_results(self, result):
-        if result.notebook_result.is_run_from_notebook == True:
+        if result.notebook_result.is_run_from_notebook:
             return result.notebook_result.nutter_test_results
-        
+
         return self.__to_testresults(result.notebook_result.exit_output)
 
     def get_view(self):
@@ -185,7 +189,7 @@ class RunCommandResultView(ResultsView):
         except Exception as ex:
             error = 'error while creating result from {}. Error: {}'.format(
                 ex, exit_output)
-            #logging.debug(error)
+            logging.debug(error)
             return None
 
     @property
@@ -194,11 +198,11 @@ class RunCommandResultView(ResultsView):
 
     @property
     def passing_tests(self):
-        return list(filter(lambda x: x.passed == True, self.test_cases_views))
+        return list(filter(lambda x: x.passed, self.test_cases_views))
 
     @property
     def failing_tests(self):
-        return list(filter(lambda x: x.passed == False, self.test_cases_views))
+        return list(filter(lambda x: not x.passed, self.test_cases_views))
 
 
 class TestCaseResultView(ResultsView):
@@ -227,8 +231,7 @@ class TestCaseResultView(ResultsView):
         sw.write_line("")
         sw.write_line(self.stack_trace)
         sw.write_line("")
-        sw.write_line(self.exception.__class__.__name__ +
-                      ": " + str(self.exception))
+        sw.write_line(self.exception.__class__.__name__ + ": " + str(self.exception))
 
         return sw.to_string()
 

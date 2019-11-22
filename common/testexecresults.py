@@ -1,11 +1,16 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+
 from .apiclientresults import ExecuteNotebookResult, NotebookOutputResult
-from .resultsview import RunCommandResultsView, TestCaseResultView
+from .resultsview import RunCommandResultsView
 from .testresult import TestResults
 
 
 class TestExecResults():
     def __init__(self, test_results):
-        if isinstance(test_results, TestResults) == False:
+        if not isinstance(test_results, TestResults):
             raise TypeError("test_results must be of type TestResults")
         self.test_results = test_results
         self.runcommand_results_view = RunCommandResultsView()

@@ -1,3 +1,8 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+
 import pytest
 from runtime.fixtureloader import FixtureLoader
 from tests.runtime.testnutterfixturebuilder import TestNutterFixtureBuilder

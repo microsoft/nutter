@@ -1,6 +1,10 @@
-import json
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+
 import logging
-from abc import abstractmethod, ABCMeta
+from abc import ABCMeta
 from common.testresult import TestResults
 from .fixtureloader import FixtureLoader
 from common.testexecresults import TestExecResults

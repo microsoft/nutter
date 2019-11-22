@@ -1,3 +1,8 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+
 import pytest
 from common.testexecresults import TestExecResults
 from common.testresult import TestResults, TestResult

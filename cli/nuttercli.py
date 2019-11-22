@@ -1,20 +1,20 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+
 import fire
 import logging
 import os
-import sys
 import datetime
 
-from queue import Queue
 import common.api as api
 from common.apiclient import InvalidConfigurationException
-from common.apiclientresults import ExecuteNotebookResult
-from common.statuseventhandler import EventHandler, StatusEvent
-from common.api import NutterStatusEvents
 
 import common.resultsview as view
 from .eventhandlers import ConsoleEventHandler
 from .resultsvalidator import ExecutionResultsValidator
-from .reportsman import ReportWriterManager, ReportWriters, ReportWritersTypes
+from .reportsman import ReportWriters
 from . import reportsman as reports
 
 __version__ = '0.1.31'
@@ -42,16 +42,26 @@ class NutterCLI(object):
     def __init__(self, debug=False, log_to_file=False, version=False):
         self._logger = logging.getLogger('NutterCLI')
         self._handle_show_version(version)
-        #CLI only logger so the output is not dictated by the logging configuration of all the other components
+
+        # CLI only logger so the output is not dictated
+        # by the logging configuration of all the other components
         self._set_debugging(debug, log_to_file)
         self._print_cli_header()
         self._set_nutter(debug)
         super().__init__()
 
-    def run(self, test_pattern, cluster_id, timeout=120, junit_report=False, tags_report=False, max_parallel_tests=1, recursive=False):
+    def run(self, test_pattern, cluster_id,
+            timeout=120, junit_report=False,
+            tags_report=False, max_parallel_tests=1,
+            recursive=False):
         try:
-            logging.debug("Running tests. test_pattern: {} cluster_id: {} timeout: {} junit_report: {} max_parallel_tests: {} tags_report: {}  recursive:{} ".format(
-                test_pattern, cluster_id, timeout, junit_report, max_parallel_tests, tags_report, recursive))
+            logging.debug(""" Running tests. test_pattern: {} cluster_id: {} timeout: {}
+                               junit_report: {} max_parallel_tests: {}
+                               tags_report: {}  recursive:{} """
+                          .format(test_pattern, cluster_id, timeout,
+                                  junit_report, max_parallel_tests,
+                                  tags_report, recursive))
+
             logging.debug("Executing test(s): {}".format(test_pattern))
 
             if self._is_a_test_pattern(test_pattern):
@@ -135,7 +145,8 @@ class NutterCLI(object):
                 return False
             return True
         logging.Fatal(
-            'Invalid argument. The value must be the full path to the test or a pattern')
+            """ Invalid argument.
+                 The value must be the full path to the test or a pattern """)
 
     def _print_cli_header(self):
         print(get_cli_header())
@@ -159,7 +170,9 @@ class NutterCLI(object):
         return 'Nutter Version {}'.format(version)
 
     def _print_config_error_and_exit(self):
-        print('Invalid configuration.\nDATABRICKS_HOST and DATABRICKS_TOKEN environment variables are not set')
+        print(""" Invalid configuration.\n
+                  DATABRICKS_HOST and DATABRICKS_TOKEN
+                   environment variables are not set """)
         exit(1)
 
     def _set_debugging(self, debug, log_to_file):
@@ -169,7 +182,9 @@ class NutterCLI(object):
                 log_name = 'nutter-exec-{0:%Y.%m.%d.%H%M%S%f}.log'.format(
                     datetime.datetime.utcnow())
             logging.basicConfig(
-                filename=log_name, format="%(asctime)s:%(levelname)s:%(message)s", level=logging.DEBUG)
+                filename=log_name,
+                format="%(asctime)s:%(levelname)s:%(message)s",
+                level=logging.DEBUG)
 
 
 def main():

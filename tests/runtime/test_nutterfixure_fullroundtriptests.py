@@ -1,3 +1,8 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+
 import sys
 import pytest
 from runtime.nutterfixture import NutterFixture, tag

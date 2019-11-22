@@ -1,3 +1,8 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+
 import pytest
 from queue import Queue
 from cli.eventhandlers import ConsoleEventHandler

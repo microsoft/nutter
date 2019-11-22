@@ -1,3 +1,8 @@
+"""
+Copyright (c) Microsoft Corporation.
+Licensed under the MIT license.
+"""
+
 import uuid
 import time
 from databricks_api import DatabricksAPI
@@ -24,12 +29,14 @@ class DatabricksAPIClient(object):
 
         if config is None:
             raise InvalidConfigurationException
-        #TODO: remove the dependency with this API, an instead use httpclient/requests
+
+        # TODO: remove the dependency with this API, an instead use httpclient/requests
         db = DatabricksAPI(host=config.host,
                            token=config.token)
         self.inner_dbclient = db
-        #the retrier uses the recommended defaults
-        #https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/jobs
+
+        # The retrier uses the recommended defaults
+        # https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/jobs
         self._retrier = HTTPRetrier()
 
     def list_notebooks(self, path):
@@ -47,7 +54,8 @@ class DatabricksAPIClient(object):
 
         return workspace_path_obj
 
-    def execute_notebook(self, notebook_path, cluster_id, notebook_params=None, timeout=120):
+    def execute_notebook(self, notebook_path, cluster_id,
+                         notebook_params=None, timeout=120):
         if not notebook_path:
             raise ValueError("empty path")
         if not cluster_id:
@@ -87,8 +95,9 @@ class DatabricksAPIClient(object):
             lcs = utils.recursive_find(
                 output, ['metadata', 'state', 'life_cycle_state'])
 
-            #As per https://docs.azuredatabricks.net/api/latest/jobs.html#jobsrunlifecyclestate
-            # all these are terminal states
+            # As per:
+            # https://docs.azuredatabricks.net/api/latest/jobs.html#jobsrunlifecyclestate
+            # All these are terminal states
             if lcs == 'TERMINATED' or lcs == 'SKIPPED' or lcs == 'INTERNAL_ERROR':
                 return lcs, output
             time.sleep(1)
@@ -98,7 +107,9 @@ class DatabricksAPIClient(object):
         run_page_url = utils.recursive_find(
             output, ['metadata', 'run_page_url'])
         raise TimeOutException(
-            "Timeout while waiting for the result of a test.\nCheck the status of the execution\nRun page URL: {}".format(run_page_url))
+            """ Timeout while waiting for the result of a test.\n
+                Check the status of the execution\n
+                Run page URL: {} """.format(run_page_url))
 
     def __get_notebook_task(self, path, params):
         ntask = {}
