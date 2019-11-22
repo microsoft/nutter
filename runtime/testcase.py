@@ -17,8 +17,10 @@ def get_testcase(test_name):
 
 
 class TestCase():
-    ERROR_MESSAGE_RUN_MISSING = "TestCase does not contain a run function.  Please pass a function to set_run"
-    ERROR_MESSAGE_ASSERTION_MISSING = "TestCase does not contain an assertion function.  Please pass a function to set_assertion"
+    ERROR_MESSAGE_RUN_MISSING = """ TestCase does not contain a run function.
+                                      Please pass a function to set_run"""
+    ERROR_MESSAGE_ASSERTION_MISSING = """ TestCase does not contain an assertion function.
+                                            Please pass a function to set_assertion """
 
     def __init__(self, test_name):
         self.test_name = test_name
@@ -53,21 +55,23 @@ class TestCase():
                     self.tags.extend(self.run.tag)
                 else:
                     self.tags.append(self.run.tag)
-            if self.is_valid() == False:
+            if not self.is_valid():
                 raise NoTestCasesFoundError(
                     "Both a run and an assertion are required for every test")
-            if self.__before_set == True and self.before is not None:
+            if self.__before_set and self.before is not None:
                 self.before()
             self.run()
             self.assertion()
-            if self.__after_set == True and self.after is not None:
+            if self.__after_set and self.after is not None:
                 self.after()
 
         except Exception as exc:
-            stack = traceback.print_exc()
-            return TestResult(self.test_name, False, self.__get_elapsed_time(start_time), self.tags, exc, traceback.format_exc())
+            return TestResult(self.test_name, False,
+                              self.__get_elapsed_time(start_time), self.tags,
+                              exc, traceback.format_exc())
 
-        return TestResult(self.test_name, True, self.__get_elapsed_time(start_time), self.tags, None)
+        return TestResult(self.test_name, True,
+                          self.__get_elapsed_time(start_time), self.tags, None)
 
     def is_valid(self):
         is_valid = True
