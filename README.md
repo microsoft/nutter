@@ -3,12 +3,56 @@
 # Nutter
 
 ## Overview
-The Nutter framework makes it easy to test Databricks notebooks.  The framework enables a simple inner dev loop, but also easily integrates with Azure DevOps Build/Release pipelines, among others.  When data or ML engineers want to test a notebook, they simply create a test notebook called *test_*<notebook_under_test>.  
 
+The Nutter framework makes it easy to test Databricks notebooks.  The framework enables a simple inner dev loop and easily integrates with Azure DevOps Build/Release pipelines, among others.  When data or ML engineers want to test a notebook, they simply create a test notebook called *test_*<notebook_under_test>.
+
+Nutter has 2 main components:
+
+1. Nutter Runner - this is the server-side component that is installed as a library on the Databricks cluster
+2. Nutter CLI - this is the client CLI that can be installed both on a developers laptop and on a build agent
 
 The tests can be run from within that notebook or executed from the Nutter CLI, useful for integrating into Build/Release pipelines.
 
+## Nutter Runner
+
+### Cluster Installation
+
+The Nutter Runner can be installed as a cluster library, via PyPI.
+
+For more information about installing libraries on a cluster, review [Install a library on a cluster](https://docs.microsoft.com/en-us/azure/databricks/libraries#--install-a-library-on-a-cluster).
+
+### Nutter Fixture
+
+The Nutter Runner is simply a base Python class, NutterFixture, that test fixtures implement.  The runner is installed as a library on the Databricks cluster.  The NutterFixture base class can then be imported in a test notebook and implemented by a test fixture:
+
+``` Python
+from runtime.nutterfixture import NutterFixture, tag
+class MyTestFixture(NutterFixture):
+   …
+```
+
+To run the tests:
+
+``` Python
+result = MyTestFixture().execute_tests()
+```
+
+To view the results from within the test notebook:
+
+``` Python
+print(result.to_string())
+```
+
+To return the test results to the Nutter CLI:
+
+``` Python
+result.exit(dbutils)
+```
+
+__Note:__ The call to result.exit, behind the scenes calls dbutils.notebook.exit, passing the serialized TestResults back to the CLI.  At the current time, print statements do not work when dbutils.notebook.exit is called in a notebook, even if they are written prior to the call.  For this reason, it is required to *temporarily* comment out result.exit(dbutils) when running the tests locally.
+
 The following defines a single test fixture named 'MyTestFixture' that has 1 TestCase named 'test_name':
+
 ``` Python
 from runtime.nutterfixture import NutterFixture, tag
 class MyTestFixture(NutterFixture):
@@ -28,6 +72,7 @@ result.exit(dbutils)
 ```
 
 To execute the test from within the test notebook, simply run the cell containing the above code.  At the current time, in order to see the below test result, you will have to comment out the call to result.exit(dbutils).  That call is required to send the results, if the test is run from the CLI, so do not forget to uncomment after locally testing.
+
 ``` Python
 Notebook: (local) - Lifecycle State: N/A, Result: N/A
 ============================================================
@@ -39,45 +84,22 @@ test_name (19.43149897100011 seconds)
 ============================================================
 ```
 
-## Components
-Nutter has 2 main components:
-1. Nutter Runner - this is the server-side component that is installed as a library on the Databricks cluster
-2. Nutter CLI - this is the client CLI that can be installed both on a developers laptop and on a build agent
-
-## Nutter Runner
-The Nutter Runner is simply a base Python class, NutterFixture, that test fixtures implement.  The runner is installed as a library on the Databricks cluster.  The NutterFixture base class can then be imported in a test notebook and implemented by a test fixture:
-``` Python
-from runtime.nutterfixture import NutterFixture, tag
-class MyTestFixture(NutterFixture):
-   …
-```
-
-To run the tests:
-``` Python
-result = MyTestFixture().execute_tests()
-```
-
-To view the results from within the test notebook:
-``` Python
-print(result.to_string())
-```
-
-To return the test results to the Nutter CLI:
-``` Python
-result.exit(dbutils)
-```
-
-__Note:__ The call to result.exit, behind the scenes calls dbutils.notebook.exit, passing the serialized TestResults back to the CLI.  At the current time, print statements do not work when dbutils.notebook.exit is called in a notebook, even if they are written prior to the call.  For this reason, it is required to *temporarily* comment out result.exit(dbutils) when running the tests locally.
-
 ### Test Cases
+
 A test fixture can contain 1 or mote test cases.  Test cases are discovered when execute_tests() is called on the test fixture.  Every test case is comprised of 2 required and 2 optional methods and are discovered by the following convention: prefix_testname, where valid prefixes are: before_, run_, assertion_, and after_.  A test fixture that has run_fred and assertion_fred methods has 1 test case called 'fred'.  The following are details about test case methods:  
 
-* before_(testname) - (optional) - if provided, is run prior to the 'run_' method.  This method can be used to setup any test pre-conditions
-* run_(testname) - (required) - run after 'before_' if before was provided, otherwise run first.  This method typically runs the notebook under test
-* assertion_(testname) (required) - run after 'run_'.  This method typically contains the test assertions
-* after_(testname) (optional) - if provided, run after 'assertion_'.  This method typically is used to clean up any test data used by the test
+* _before\_(testname)_ - (optional) - if provided, is run prior to the 'run_' method.  This method can be used to setup any test pre-conditions
+
+* _run\_(testname)_ - (required) - run after 'before_' if before was provided, otherwise run first.  This method typically runs the notebook under test
+
+* _assertion\_(testname)_ (required) - run after 'run_'.  This method typically contains the test assertions
+
+__Note:__  You can assert test scenarios using the standard ``` assert ``` statement or the assertion capabilities from a package of your choice.
+
+* _after\_(testname)_ (optional) - if provided, run after 'assertion_'.  This method typically is used to clean up any test data used by the test
 
 A test fixture can have multiple test cases.  The following example shows a fixture called MultiTestFixture with 2 test cases: 'test_case_1' and 'test_case_2' (assertion code omitted for brevity):
+
 ``` Python
 from runtime.nutterfixture import NutterFixture, tag
 class MultiTestFixture(NutterFixture):
@@ -95,11 +117,13 @@ class MultiTestFixture(NutterFixture):
 
 result = MultiTestFixture().execute_tests()
 print(result.to_string())
-result.exit(dbutils)
+#result.exit(dbutils)
 ```
 
 ### before_all and after_all
+
 Test Fixtures also can have a before_all() method which is run prior to all tests and an after_all() which is run after all tests.  
+
 ``` Python
 from runtime.nutterfixture import NutterFixture, tag
 class MultiTestFixture(NutterFixture):
@@ -116,41 +140,29 @@ class MultiTestFixture(NutterFixture):
       …
 ```
 
-### Installing the Nutter Runner on Azure Databricks
-Perform the following steps to install the Nutter wheel file on your Azure Databricks cluster:
-1. Open your Azure Databricks workspace
-2. Click on the 'Clusters' link (on the left)
-3. Click on the cluster you wish to install Nutter on
-4. Click 'Libraries' (at the top)
-5. Click 'Install New'
-6. Drag the Nutter whl file 
-
 ## Nutter CLI
 
-### 
-### Getting Started
-Install the Nutter CLI from the source.
+### Getting Started with the Nutter CLI
+
+Install the Nutter CLI
 
 ``` bash
-pip install setuptools
-git clone https://github.com/microsoft/nutter
-cd nutter
-python setup.py bdist_wheel
-cd dist
-pip install nutter-<LATEST_VERSION>-py3-none-any.whl
+pip install nutter
 ```
 
 __Note:__ It's recommended to install the Nutter CLI in a virtual environment.
 
 Set the environment variables.
 
-Linux 
+Linux
+
 ``` bash
 export DATABRICKS_HOST=<HOST>
 export DATABRICKS_TOKEN=<TOKEN>
 ```
 
 Windows PowerShell
+
 ``` cmd
 $env DATABRICKS_HOST="HOST"
 $env DATABRICKS_TOKEN="TOKEN"
@@ -183,11 +195,13 @@ nutter list /dataload --recursive
 The ```run``` command  schedules the execution of test notebooks and waits for their result.
 
 ### Run single test notebook
+
 The following command executes the test notebook ```/dataload/test_sourceLoad``` in the cluster ```0123-12334-tonedabc```.
 
 ```bash
 nutter run dataload/test_sourceLoad --cluster_id 0123-12334-tonedabc
 ```
+
 __Note:__ In Azure Databricks you can get the cluster ID by selecting a cluster name from the Clusters tab and clicking on the JSON view.
 
 ### Run multiple tests notebooks
@@ -225,9 +239,9 @@ __Note:__ Running tests notebooks in parallel introduces the risk of data race c
 
 ## Nutter CLI Syntax and Flags
 
-*Run Command*
+### Run Command
 
-```
+``` bash
 SYNOPSIS
     nutter run TEST_PATTERN CLUSTER_ID <flags>
 
@@ -236,20 +250,20 @@ POSITIONAL ARGUMENTS
     CLUSTER_ID
 ```
 
-```
+```  bash
 FLAGS
     --timeout              Execution timeout. Default 120s
     --junit_report         Create a JUnit XML report from the test results.
     --tags_report          Create a CSV report from the test results that includes the test cases tags.
     --max_parallel_tests   Sets the level of parallelism for test notebook execution.
     --recursive            Executes all tests in the hierarchical folder structure. 
-```   
+```
 
 __Note:__ You can also use flags syntax for POSITIONAL ARGUMENTS
 
-*List Command*
+### List Command
 
-```
+``` bash
 NAME
     nutter list
 
@@ -260,7 +274,7 @@ POSITIONAL ARGUMENTS
     PATH
 ```
 
-```
+``` bash
 FLAGS
     --recursive         Lists all tests in the hierarchical folder structure.
 ```
@@ -271,18 +285,109 @@ __Note:__ You can also use flags syntax for POSITIONAL ARGUMENTS
 
 You can run the Nutter CLI within an Azure DevOps pipeline. The Nutter CLI will exit with non-zero code when a test case fails or the execution of the test notebook is not successful.
 
-For full integration of the test results with Azure DevOps you can set the flag ```--junit_report```. When this flag is set, the Nutter CLI outputs the results of the tests cases as a JUnit XML compliant file.
+The following Azure DevOps pipeline installs nutter, recursively executes all tests in the workspace folder ```/Shared/ ```  and publishes the test results.
+
+__Note:__ The pipeline expects the Databricks cluster, host and API token as pipeline varibles.
+
+
+
+```yaml
+# Starter Nutter pipeline
+
+trigger:
+- develop
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.5'
+
+- script: |
+    pip install nutter
+  displayName: 'Install Nutter'
+
+- script: |
+    nutter run /Shared/ $CLUSTER --recursive --junit_report
+  displayName: 'Execute Nutter'
+  env:
+      CLUSTER: $(clusterID)
+      DATABRICKS_HOST: $(databricks_host)
+      DATABRICKS_TOKEN: $(databricks_token)
+
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: 'JUnit'
+    testResultsFiles: '**/test-*.xml'
+    testRunTitle: 'Publish Nutter results'
+```
+
+In some scenarios, the notebooks under tests must be executed in a  is preconfigured test workspace that contains the necessary pre-requisites such as test data, tables or mounted points etc. In such scenarios, the pipeline must deploy the notebooks to the test workspace before Nutter can execute the tests.
+
+The following sample pipeline uses the Databricks CLI to publish the notebooks from triggering branch to the test workspace. 
+
+
+```yaml
+# Starter Nutter pipeline
+
+trigger:
+- develop
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.5'
+
+- task: configuredatabricks@0
+  displayName: 'Configure Databricks CLI'
+  inputs:
+    url: $(databricks_host)
+    token: $(databricks_token)
+
+- task: deploynotebooks@0
+  displayName: 'Publish notebooks to test workspace'
+  inputs:
+    notebooksFolderPath: '$(System.DefaultWorkingDirectory)/notebooks/nutter'
+    workspaceFolder: '/Shared/nutter'
+
+- script: |
+    pip install nutter
+  displayName: 'Install Nutter'
+
+- script: |
+    nutter run /Shared/ $CLUSTER --recursive --junit_report
+  displayName: 'Execute Nutter'
+  env:
+      CLUSTER: $(clusterID)
+      DATABRICKS_HOST: $(databricks_host)
+      DATABRICKS_TOKEN: $(databricks_token)
+
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: 'JUnit'
+    testResultsFiles: '**/test-*.xml'
+    testRunTitle: 'Publish Nutter results'
+```
 
 # Contributing
+
 ## Using VS Code
-- There's a known issue with VS Code and the lastest version of pytest.
- - Please make sure that you install pytest 5.0.1
- - If you installed pytest using VS Code, then you are likely using the incorrect version. Run the following command to fix it:
+
+ - There's a known issue with VS Code and the lastest version of pytest.
+   - Please make sure that you install pytest 5.0.1
+   - If you installed pytest using VS Code, then you are likely using the incorrect version. Run the following command to fix it:
+
 ``` Python
 pip install --force-reinstall pytest==5.0.1
  ```
 
 ## Creating the wheel file and manually test wheel locally
+
 1. Change directory to the root that contains setup.py
 2. Update the version in the setup.py
 3. Run the following command: python3 setup.py sdist bdist_wheel
