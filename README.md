@@ -10,7 +10,6 @@
   * [before_all and after_all](#before-all-and-after-all)
 - [Nutter CLI](#nutter-cli)
   * [Getting Started with the Nutter CLI](#getting-started-with-the-nutter-cli)
-- [Examples](#examples)
   * [Listing Test Notebooks](#listing-test-notebooks)
   * [Executing Test Notebooks](#executing-test-notebooks)
   * [Run single test notebook](#run-single-test-notebook)
@@ -194,8 +193,6 @@ $env DATABRICKS_TOKEN="TOKEN"
 ```
 
 __Note:__ For more information about personal access tokens review  [Databricks API Authentication](https://docs.azuredatabricks.net/dev-tools/api/latest/authentication.html).
-
-## Examples
 
 ### Listing Test Notebooks
 
