@@ -40,6 +40,8 @@ The tests can be run from within that notebook or executed from the Nutter CLI, 
 
 The Nutter Runner can be installed as a cluster library, via PyPI.
 
+![](cluster_install.PNG?raw=true)
+
 For more information about installing libraries on a cluster, review [Install a library on a cluster](https://docs.microsoft.com/en-us/azure/databricks/libraries#--install-a-library-on-a-cluster).
 
 ### Nutter Fixture
