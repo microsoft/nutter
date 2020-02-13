@@ -11,8 +11,8 @@
 - [Nutter CLI](#nutter-cli)
   * [Getting Started with the Nutter CLI](#getting-started-with-the-nutter-cli)
 - [Examples](#examples)
-  * [1. Listing Test Notebooks](#1-listing-test-notebooks)
-  * [2. Executing Test Notebooks](#2-executing-test-notebooks)
+  * [Listing Test Notebooks](#listing-test-notebooks)
+  * [Executing Test Notebooks](#executing-test-notebooks)
   * [Run single test notebook](#run-single-test-notebook)
   * [Run multiple tests notebooks](#run-multiple-tests-notebooks)
   * [Parallel Execution](#parallel-execution)
@@ -197,7 +197,7 @@ __Note:__ For more information about personal access tokens review  [Databricks 
 
 ## Examples
 
-### 1. Listing Test Notebooks
+### Listing Test Notebooks
 
 The following command list all test notebooks in the folder ```/dataload```
 
@@ -215,7 +215,7 @@ You can list all test notebooks in the folder structure using the ```--recursive
 nutter list /dataload --recursive
 ```
 
-### 2. Executing Test Notebooks
+### Executing Test Notebooks
 
 The ```run``` command  schedules the execution of test notebooks and waits for their result.
 
