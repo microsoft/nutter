@@ -23,7 +23,7 @@ For more information about installing libraries on a cluster, review [Install a 
 
 ### Nutter Fixture
 
-The Nutter Runner is simply a base Python class, NutterFixture, that test fixtures implement.  The runner is installed as a library on the Databricks cluster.  The NutterFixture base class can then be imported in a test notebook and implemented by a test fixture:
+The Nutter Runner is simply a base Python class, NutterFixture, that test fixtures implement.  The runner runtime is a module you can use once you install Nutter on the Databricks cluster.  The NutterFixture base class can then be imported in a test notebook and implemented by a test fixture:
 
 ``` Python
 from runtime.nutterfixture import NutterFixture, tag
@@ -141,6 +141,8 @@ class MultiTestFixture(NutterFixture):
 ```
 
 ## Nutter CLI
+
+The Nutter CLI is a command line interface that allows you to execute and list tests via a Command Prompt.
 
 ### Getting Started with the Nutter CLI
 
@@ -324,7 +326,7 @@ steps:
     testRunTitle: 'Publish Nutter results'
 ```
 
-In some scenarios, the notebooks under tests must be executed in a  is preconfigured test workspace that contains the necessary pre-requisites such as test data, tables or mounted points etc. In such scenarios, the pipeline must deploy the notebooks to the test workspace before Nutter can execute the tests.
+In some scenarios, the notebooks under tests must be executed in a  pre-configured test workspace, other than the development one, that contains the necessary pre-requisites such as test data, tables or mounted points. In such scenarios, you can use the pipeline to deploy the notebooks to the test workspace before executing the tests with Nutter.
 
 The following sample pipeline uses the Databricks CLI to publish the notebooks from triggering branch to the test workspace. 
 
@@ -374,9 +376,9 @@ steps:
     testRunTitle: 'Publish Nutter results'
 ```
 
-# Contributing
+## Contributing
 
-## Using VS Code
+### Using VS Code
 
  - There's a known issue with VS Code and the lastest version of pytest.
    - Please make sure that you install pytest 5.0.1
@@ -386,7 +388,7 @@ steps:
 pip install --force-reinstall pytest==5.0.1
  ```
 
-## Creating the wheel file and manually test wheel locally
+### Creating the wheel file and manually test wheel locally
 
 1. Change directory to the root that contains setup.py
 2. Update the version in the setup.py
