@@ -1,7 +1,28 @@
 
-
 # Nutter
 
+
+- [Overview](#overview)
+- [Nutter Runner](#nutter-runner)
+  * [Cluster Installation](#cluster-installation)
+  * [Nutter Fixture](#nutter-fixture)
+  * [Test Cases](#test-cases)
+  * [before_all and after_all](#before-all-and-after-all)
+- [Nutter CLI](#nutter-cli)
+  * [Getting Started with the Nutter CLI](#getting-started-with-the-nutter-cli)
+- [Examples](#examples)
+  * [1. Listing Test Notebooks](#1-listing-test-notebooks)
+  * [2. Executing Test Notebooks](#2-executing-test-notebooks)
+  * [Run single test notebook](#run-single-test-notebook)
+  * [Run multiple tests notebooks](#run-multiple-tests-notebooks)
+  * [Parallel Execution](#parallel-execution)
+- [Nutter CLI Syntax and Flags](#nutter-cli-syntax-and-flags)
+  * [Run Command](#run-command)
+  * [List Command](#list-command)
+- [Integrating Nutter with Azure DevOps](#integrating-nutter-with-azure-devops)
+- [Contributing](#contributing)
+  * [Contribution Tips](#contribution-tips)
+  * [Contribution Guidelines](#contribution-guidelines)
 ## Overview
 
 The Nutter framework makes it easy to test Databricks notebooks.  The framework enables a simple inner dev loop and easily integrates with Azure DevOps Build/Release pipelines, among others.  When data or ML engineers want to test a notebook, they simply create a test notebook called *test_*<notebook_under_test>.
@@ -378,7 +399,7 @@ steps:
 
 ## Contributing
 
-### Using VS Code
+### Contribution Tips
 
  - There's a known issue with VS Code and the lastest version of pytest.
    - Please make sure that you install pytest 5.0.1
@@ -388,9 +409,16 @@ steps:
 pip install --force-reinstall pytest==5.0.1
  ```
 
-### Creating the wheel file and manually test wheel locally
+Creating the wheel file and manually test wheel locally
 
 1. Change directory to the root that contains setup.py
 2. Update the version in the setup.py
 3. Run the following command: python3 setup.py sdist bdist_wheel
 4. (optional) Install the wheel locally by running: python3 -m pip install <path-to-whl-file>
+
+### Contribution Guidelines
+
+If you would like to become an active contributor to this project please follow the instructions provided in [Microsoft Azure Projects Contribution Guidelines](http://azure.github.io/guidelines/).
+
+-----
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
