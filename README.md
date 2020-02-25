@@ -274,7 +274,7 @@ POSITIONAL ARGUMENTS
 
 ```  bash
 FLAGS
-    --timeout              Execution timeout. Default 120s
+    --timeout              Execution timeout in seconds. Integer value. Default is 120
     --junit_report         Create a JUnit XML report from the test results.
     --tags_report          Create a CSV report from the test results that includes the test cases tags.
     --max_parallel_tests   Sets the level of parallelism for test notebook execution.
@@ -344,6 +344,7 @@ steps:
     testResultsFormat: 'JUnit'
     testResultsFiles: '**/test-*.xml'
     testRunTitle: 'Publish Nutter results'
+  condition: succeededOrFailed()
 ```
 
 In some scenarios, the notebooks under tests must be executed in a  pre-configured test workspace, other than the development one, that contains the necessary pre-requisites such as test data, tables or mounted points. In such scenarios, you can use the pipeline to deploy the notebooks to the test workspace before executing the tests with Nutter.
@@ -394,6 +395,7 @@ steps:
     testResultsFormat: 'JUnit'
     testResultsFiles: '**/test-*.xml'
     testRunTitle: 'Publish Nutter results'
+  condition: succeededOrFailed()
 ```
 
 ## Contributing
