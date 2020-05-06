@@ -6,6 +6,7 @@ Licensed under the MIT license.
 import pytest
 from runtime.nutterfixture import NutterFixture, tag, InvalidTestFixtureException
 from runtime.testcase import TestCase
+from runtime.fixtureloader import FixtureLoader
 from common.testresult  import TestResult, TestResults
 from tests.runtime.testnutterfixturebuilder import TestNutterFixtureBuilder
 from common.apiclientresults import ExecuteNotebookResult
@@ -228,6 +229,15 @@ def test__execute_tests__two_test_cases__returns_test_results_with_2_test_result
     # Assert 
     assert len(result.test_results.results) == 2
 
+def test__execute_tests__test_names_not_in_order_in_class__tests_executed_in_alphabetical_order():
+    # Arrange
+    fix = OutOfOrderTestFixture()
+
+    # Act
+    fix.execute_tests()
+
+    # Assert
+    assert '1wxyz' == fix.get_method_order()
 
 def test__run_test_method__has_list_tag_decorator__list_set_on_method():
     # Arrange
@@ -296,7 +306,8 @@ def test__non_run_test_method__valid_tag_on_non_run_method__raises_value_error()
 
 def __get_test_case(name, setrun, setassert):
     tc = TestCase(name)
-    tc.set_run(setrun)
+    if setrun != None:
+        tc.set_run(setrun)
     tc.set_assertion(setassert)
 
     return tc
@@ -338,3 +349,30 @@ class SimpleTestFixture(NutterFixture):
     def run_test_with_invalid_decorator(self):
         pass
 
+class OutOfOrderTestFixture(NutterFixture):
+    def __init__(self):
+        super(OutOfOrderTestFixture, self).__init__()
+        self.__method_order = ''
+
+    def assertion_y(self):
+        self.__method_order += 'y'
+        assert 1 == 1
+
+    def assertion_z(self):
+        self.__method_order += 'z'
+        assert 1 == 1
+
+    def assertion_1(self):
+        self.__method_order += '1'
+        assert 1 == 1
+        
+    def assertion_w(self):
+        self.__method_order += 'w'
+        assert 1 == 1
+
+    def assertion_x(self):
+        self.__method_order += 'x'
+        assert 1 == 1
+    
+    def get_method_order(self):
+        return self.__method_order

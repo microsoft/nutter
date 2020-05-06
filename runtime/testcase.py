@@ -17,8 +17,6 @@ def get_testcase(test_name):
 
 
 class TestCase():
-    ERROR_MESSAGE_RUN_MISSING = """ TestCase does not contain a run function.
-                                      Please pass a function to set_run"""
     ERROR_MESSAGE_ASSERTION_MISSING = """ TestCase does not contain an assertion function.
                                             Please pass a function to set_assertion """
 
@@ -27,6 +25,7 @@ class TestCase():
         self.before = None
         self.__before_set = False
         self.run = None
+        self.__run_set = False
         self.assertion = None
         self.after = None
         self.__after_set = False
@@ -39,6 +38,7 @@ class TestCase():
 
     def set_run(self, run):
         self.run = run
+        self.__run_set = True
 
     def set_assertion(self, assertion):
         self.assertion = assertion
@@ -60,7 +60,8 @@ class TestCase():
                     "Both a run and an assertion are required for every test")
             if self.__before_set and self.before is not None:
                 self.before()
-            self.run()
+            if self.__run_set:
+                self.run()
             self.assertion()
             if self.__after_set and self.after is not None:
                 self.after()
@@ -75,10 +76,6 @@ class TestCase():
 
     def is_valid(self):
         is_valid = True
-
-        if self.run is None:
-            self.__add_message_to_error(self.ERROR_MESSAGE_RUN_MISSING)
-            is_valid = False
 
         if self.assertion is None:
             self.__add_message_to_error(self.ERROR_MESSAGE_ASSERTION_MISSING)
