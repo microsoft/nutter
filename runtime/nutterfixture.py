@@ -8,6 +8,7 @@ from abc import ABCMeta
 from common.testresult import TestResults
 from .fixtureloader import FixtureLoader
 from common.testexecresults import TestExecResults
+from collections import OrderedDict
 
 
 def tag(the_tag):
@@ -57,7 +58,7 @@ class NutterFixture(object):
         if test_case_dict is None:
             logging.fatal("Invalid Test Fixture")
             raise InvalidTestFixtureException("Invalid Test Fixture")
-        self.__test_case_dict = test_case_dict
+        self.__test_case_dict = OrderedDict(sorted(test_case_dict.items(), key=lambda t: t[0]))
 
         logging.debug("Found {} test cases".format(len(test_case_dict)))
         for key, value in self.__test_case_dict.items():
