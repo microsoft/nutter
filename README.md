@@ -108,13 +108,13 @@ test_name (19.43149897100011 seconds)
 
 ### Test Cases
 
-A test fixture can contain 1 or mote test cases.  Test cases are discovered when execute_tests() is called on the test fixture.  Every test case is comprised of 2 required and 2 optional methods and are discovered by the following convention: prefix_testname, where valid prefixes are: before_, run_, assertion_, and after_.  A test fixture that has run_fred and assertion_fred methods has 1 test case called 'fred'.  The following are details about test case methods:  
+A test fixture can contain 1 or mote test cases.  Test cases are discovered when execute_tests() is called on the test fixture.  Every test case is comprised of 1 required and 3 optional methods and are discovered by the following convention: prefix_testname, where valid prefixes are: before_, run_, assertion_, and after_.  A test fixture that has run_fred and assertion_fred methods has 1 test case called 'fred'.  The following are details about test case methods:  
 
 * _before\_(testname)_ - (optional) - if provided, is run prior to the 'run_' method.  This method can be used to setup any test pre-conditions
 
-* _run\_(testname)_ - (required) - run after 'before_' if before was provided, otherwise run first.  This method typically runs the notebook under test
+* _run\_(testname)_ - (optional) - if provider, is run after 'before_' if before was provided, otherwise run first.  This method is typically used to run the notebook under test
 
-* _assertion\_(testname)_ (required) - run after 'run_'.  This method typically contains the test assertions
+* _assertion\_(testname)_ (required) - run after 'run_', if run was provided.  This method typically contains the test assertions
 
 __Note:__  You can assert test scenarios using the standard ``` assert ``` statement or the assertion capabilities from a package of your choice.
 
@@ -144,7 +144,7 @@ print(result.to_string())
 
 ### before_all and after_all
 
-Test Fixtures also can have a before_all() method which is run prior to all tests and an after_all() which is run after all tests.  
+Test Fixtures also can have a before_all() method which is run prior to all tests and an after_all() which is run after all tests.
 
 ``` Python
 from runtime.nutterfixture import NutterFixture, tag
@@ -160,6 +160,42 @@ class MultiTestFixture(NutterFixture):
 
    def after_all(self):
       …
+```
+
+### Multiple test assertions pattern with before_all
+
+It is possible to support multiple assertions for a test by implementing a before_all method, no run methods and multiple assertion methods.  In this pattern, the before_all method runs the notebook under test.  There are no run methods.  The assertion methods simply assert against what was done in before_all. 
+
+``` Python
+from runtime.nutterfixture import NutterFixture, tag
+class MultiTestFixture(NutterFixture):
+   def before_all(self):
+     dbutils.notebook.run('notebook_under_test', 600, args) 
+      …
+
+   def assertion_test_case_1(self):
+      …
+
+   def assertion_test_case_2(self):
+     …
+
+   def after_all(self):
+      …
+```
+
+### Guaranteed test order
+
+After test cases are loaded, Nutter uses a sorted dictionary to order them by name.  Therefore test cases will be executed in alphabetical order.
+
+### Sharing state between test cases
+
+It is possible to share state across test cases via instance variables.  Generally, these should be set in the constructor.  Please see below:
+
+```Python
+class TestFixture(NutterFixture):
+  def __init__(self):
+    self.file = '/data/myfile'
+    NutterFixture.__init__(self)
 ```
 
 ## Nutter CLI

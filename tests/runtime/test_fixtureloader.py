@@ -134,6 +134,29 @@ def test__load_fixture__two_assertion_one_run_method__adds_two_testclass_to_dict
     __assert_test_case_from_dict(loaded_fixture, test_name_1, True, False, False, True)
     __assert_test_case_from_dict(loaded_fixture, test_name_2, True, True, False, True)
 
+def test__load_fixture__three_assertion_methods__adds_three_testclass_to_dictionary():
+    # Arrange
+    test_name_1 = "fred"
+    test_name_2 = "hank"
+    test_name_3 = "bert"
+    new_class = TestNutterFixtureBuilder() \
+        .with_name("MyClass") \
+        .with_assertion(test_name_1) \
+        .with_assertion(test_name_2) \
+        .with_assertion(test_name_3) \
+        .build()
+
+    loader = FixtureLoader()
+
+    # Act 
+    loaded_fixture = loader.load_fixture(new_class())
+
+    # Assert
+    assert len(loaded_fixture) == 3
+    __assert_test_case_from_dict(loaded_fixture, test_name_1, True, True, False, True)
+    __assert_test_case_from_dict(loaded_fixture, test_name_2, True, True, False, True)
+    __assert_test_case_from_dict(loaded_fixture, test_name_3, True, True, False, True)
+
 def test__load_fixture__three_with_all_methods__adds_three_testclass_to_dictionary():
     # Arrange
     test_name_1 = "fred"
@@ -165,7 +188,6 @@ def test__load_fixture__three_with_all_methods__adds_three_testclass_to_dictiona
     __assert_test_case_from_dict(loaded_fixture, test_name_1, False, False, False, False)
     __assert_test_case_from_dict(loaded_fixture, test_name_2, False, False, False, False)
     __assert_test_case_from_dict(loaded_fixture, test_name_3, False, False, False, False)
-
 
 def __assert_test_case_from_dict(test_case_dict, expected_name, before_none, run_none, assertion_none, after_none):
     assert expected_name in test_case_dict
