@@ -154,6 +154,30 @@ def test__execute_tests__one_test_case_with_all_methods__all_methods_called(mock
     test_fixture.after_test.assert_called_once_with()
     test_fixture.after_all.assert_called_once_with()
 
+def test__execute_tests__one_beforeall_2_assertions__all_methods_called(mocker):
+    # Arrange
+    test_name_1 = "test"
+    test_name_2 = "test2"
+    
+    test_fixture = TestNutterFixtureBuilder() \
+        .with_name("MyClass") \
+        .with_before_all() \
+        .with_assertion(test_name_1) \
+        .with_assertion(test_name_2) \
+        .build()
+
+    mocker.patch.object(test_fixture, 'before_all')
+    mocker.patch.object(test_fixture, 'assertion_test')
+    mocker.patch.object(test_fixture, 'assertion_test2')
+
+    # Act 
+    result = test_fixture().execute_tests()
+
+    # Assert
+    test_fixture.before_all.assert_called_once_with()
+    test_fixture.assertion_test.assert_called_once_with()
+    test_fixture.assertion_test.assert_called_once_with()
+
 def __item_in_list_equalto(list, expected_item):
     for item in list:
         if (item == expected_item):

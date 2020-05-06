@@ -10,7 +10,7 @@ from common.testresult  import TestResult
 from runtime.nutterfixture import tag
 from runtime.testcase import TestCase, NoTestCasesFoundError
 
-def test__isvalid_rundoesntexist_returnsfalse():
+def test__isvalid_assertionexistsrundoesntexist_returnstrue():
     # Arrange
     tc = TestCase("Test Name")
     fixture = TestFixture()
@@ -21,14 +21,16 @@ def test__isvalid_rundoesntexist_returnsfalse():
     isvalid = tc.is_valid()
 
     # Assert
-    assert False == isvalid 
+    assert True == isvalid 
 
 def test__isvalid_assertiondoesntexist_returnsfalse():
     # Arrange
     tc = TestCase("Test Name")
     fixture = TestFixture()
     
+    tc.set_before(fixture.before_test)
     tc.set_run(fixture.run_test)
+    tc.set_after(fixture.after_test)
 
     # Act
     isvalid = tc.is_valid()
@@ -50,21 +52,6 @@ def test__isvalid_runandassertionexist_returnstrue():
     # Assert
     assert True == isvalid
 
-def test__getinvalidmessage_rundoesntexist_returnsrunerrormessage():
-    # Arrange
-    tc = TestCase("Test Name")
-    fixture = TestFixture()
-    
-    tc.set_assertion(fixture.assertion_test)
-
-    expected_message = tc.ERROR_MESSAGE_RUN_MISSING 
-
-    # Act
-    invalid_message = tc.get_invalid_message()
-
-    # Assert
-    assert expected_message == invalid_message
-
 def test__getinvalidmessage_assertiondoesntexist_returnsassertionerrormessage():
     # Arrange
     tc = TestCase("Test Name")
@@ -79,21 +66,6 @@ def test__getinvalidmessage_assertiondoesntexist_returnsassertionerrormessage():
 
     # Assert
     assert expected_message == invalid_message
-
-def test__getinvalidmessage_runandassertiondontexist_returnsrunandassertionerrormessage():
-    # Arrange
-    tc = TestCase("Test Name")
-    fixture = TestFixture()
-    
-    # Act
-    invalid_message = tc.get_invalid_message()
-
-    # Assert
-    assertion_message_exists = tc.ERROR_MESSAGE_ASSERTION_MISSING in invalid_message
-    run_message_exists = tc.ERROR_MESSAGE_RUN_MISSING in invalid_message
-
-    assert assertion_message_exists == True
-    assert run_message_exists == True
 
 def test__set_run__function_passed__sets_run_function():
     # Arrange
@@ -167,6 +139,33 @@ def test__execute_test__before_not_set__does_not_call_before(mocker):
 
     # Assert
     tc.before.assert_not_called()
+
+def test__execute_test__run_set__calls_run(mocker):
+    # Arrange
+    tc = TestCase("TestName")
+
+    tc.set_run(lambda: 1 == 1)
+    tc.set_assertion(lambda: 1 == 1)
+    mocker.patch.object(tc, 'run')
+
+    # Act
+    test_result = tc.execute_test()
+
+    # Assert
+    tc.run.assert_called_once_with()
+
+def test__execute_test__run_not_set__does_not_call_run(mocker):
+    # Arrange
+    tc = TestCase("TestName")
+
+    tc.set_assertion(lambda: 1 == 1)
+    mocker.patch.object(tc, 'run')
+
+    # Act
+    test_result = tc.execute_test()
+
+    # Assert
+    tc.run.assert_not_called()    
 
 def test__execute_test__after_set__calls_after(mocker):
     # Arrange
