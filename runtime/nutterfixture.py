@@ -55,7 +55,8 @@ class NutterFixture(object):
 
     def __load_fixture(self):
         if hasattr(self, 'data_loader') == False:
-            raise InitializationException("If you have an __init__ method in your test class, make sure you make a call to initialize the parent class.  For example: NutterFixture.init(self)")
+            raise InitializationException("If you have an __init__ method in your test class, make sure you make a call to initialize the parent class.  For example: super().__init__()")
+
 
         test_case_dict = self.data_loader.load_fixture(self)
         if test_case_dict is None:
