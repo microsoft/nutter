@@ -224,8 +224,8 @@ export DATABRICKS_TOKEN=<TOKEN>
 Windows PowerShell
 
 ``` cmd
-$env DATABRICKS_HOST="HOST"
-$env DATABRICKS_TOKEN="TOKEN"
+$env:DATABRICKS_HOST="HOST"
+$env:DATABRICKS_TOKEN="TOKEN"
 ```
 
 __Note:__ For more information about personal access tokens review  [Databricks API Authentication](https://docs.azuredatabricks.net/dev-tools/api/latest/authentication.html).
