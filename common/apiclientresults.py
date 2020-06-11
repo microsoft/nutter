@@ -162,7 +162,7 @@ class NotebookObject(WorkspaceObject):
         if name is None:
             return False
 
-        return name.lower().startswith('test_')
+        return name.lower().startswith('test_') or name.lower().endswith('_test')
 
 
 class Directory(WorkspaceObject):

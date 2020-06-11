@@ -212,7 +212,10 @@ class TestNotebook(object):
 
         self.name = name
         self.path = path
-        self.test_name = name.split("_")[1]
+        if name.lower().startswith('test_'):
+            self.test_name = name.split("_")[1]
+        if name.lower().endswith('_test'):
+            self.test_name = name.split("_")[0]
 
     def __eq__(self, obj):
         is_equal = obj.name == self.name and obj.path == self.path
@@ -230,7 +233,7 @@ class TestNotebook(object):
         if name is None:
             return False
 
-        return name.lower().startswith('test_')
+        return name.lower().startswith('test_') or name.lower().endswith('_test')
 
     @classmethod
     def _get_notebook_name_from_path(cls, path):

@@ -141,7 +141,7 @@ class NutterCLI(object):
         segments = pattern.split('/')
         if len(segments) > 0:
             search_pattern = segments[len(segments)-1]
-            if search_pattern.lower().startswith('test_'):
+            if search_pattern.lower().startswith('test_') or search_pattern.lower().endswith('_test'):
                 return False
             return True
         logging.Fatal(
