@@ -49,23 +49,6 @@ def test__list_tests__twotest__okay(mocker):
     assert tests[0] == TestNotebook('test_mynotebook', '/test_mynotebook')
     assert tests[1] == TestNotebook('mynotebook_test', '/mynotebook_test')
 
-# def test__list_suffix_tests__onetest__okay(mocker):
-
-#     nutter = _get_nutter(mocker)
-#     dbapi_client = _get_client(mocker)
-#     nutter.dbclient = dbapi_client
-#     mocker.patch.object(nutter.dbclient, 'list_objects')
-
-#     workspace_path_1 = _get_workspacepathobject(
-#         [('NOTEBOOK', '/mynotebook'), ('NOTEBOOK', '/mynotebook_test')])
-
-#     nutter.dbclient.list_objects.return_value = workspace_path_1
-
-#     tests = nutter.list_tests("/")
-
-#     assert len(tests) == 1
-#     assert tests[0] == TestNotebook('mynotebook_test', '/mynotebook_test')
-
 def test__list_tests__twotest_in_folder__okay(mocker):
 
     nutter = _get_nutter(mocker)
@@ -85,24 +68,6 @@ def test__list_tests__twotest_in_folder__okay(mocker):
         'test_mynotebook', '/folder/test_mynotebook')
     assert tests[1] == TestNotebook(
         'mynotebook_test', '/folder/mynotebook_test')
-
-# def test__list_suffix_tests__onetest_in_folder__okay(mocker):
-
-#     nutter = _get_nutter(mocker)
-#     dbapi_client = _get_client(mocker)
-#     nutter.dbclient = dbapi_client
-#     mocker.patch.object(nutter.dbclient, 'list_objects')
-
-#     workspace_path_1 = _get_workspacepathobject(
-#         [('NOTEBOOK', '/folder/mynotebook'), ('NOTEBOOK', '/folder/mynotebook_test')])
-
-#     nutter.dbclient.list_objects.return_value = workspace_path_1
-
-#     tests = nutter.list_tests("/folder")
-
-#     assert len(tests) == 1
-#     assert tests[0] == TestNotebook(
-#         'mynotebook_test', '/folder/mynotebook_test')
 
 @pytest.mark.skip('No longer needed')
 def test__list_tests__response_without_root_object__okay(mocker):
@@ -141,24 +106,6 @@ def test__list_tests__twotest_uppercase_name__okay(mocker):
 
     assert len(tests) == 2
     assert tests == [TestNotebook('TEST_mynote', '/TEST_mynote'), TestNotebook('mynote_TEST', '/mynote_TEST')]
-
-# def test__list_suffix_tests__onetest_uppercase_name__okay(mocker):
-
-#     nutter = _get_nutter(mocker)
-#     dbapi_client = _get_client(mocker)
-#     nutter.dbclient = dbapi_client
-#     mocker.patch.object(nutter.dbclient, 'list_objects')
-
-#     workspace_path_1 = _get_workspacepathobject(
-#         [('NOTEBOOK', '/mynotebook'), ('NOTEBOOK', '/mynote_TEST')])
-
-#     nutter.dbclient.list_objects.return_value = workspace_path_1
-
-#     tests = nutter.list_tests("/")
-
-#     assert len(tests) == 1
-#     assert tests == [TestNotebook('mynote_TEST', '/mynote_TEST')]
-
 
 def test__list_tests__nutterstatusevents_testlisting_sequence_is_fired(mocker):
     event_handler = TestEventHandler()
@@ -200,27 +147,6 @@ def test__list_tests_recursively__1test1dir2test__3_tests(mocker):
     assert expected == tests
     assert nutter.dbclient.list_objects.call_count == 2
 
-# def test__list_suffix_tests_recursively__1test1dir1test__2_tests(mocker):
-#     nutter = _get_nutter(mocker)
-#     dbapi_client = _get_client(mocker)
-#     nutter.dbclient = dbapi_client
-#     mocker.patch.object(nutter.dbclient, 'list_objects')
-
-#     workspace_path_1 = _get_workspacepathobject(
-#         [('NOTEBOOK', '/1_test'), ('DIRECTORY', '/p')])
-#     workspace_path_2 = _get_workspacepathobject([('NOTEBOOK', '/p/1_test')])
-
-#     nutter.dbclient.list_objects.side_effect = [
-#         workspace_path_1, workspace_path_2]
-
-#     tests = nutter.list_tests("/", True)
-
-#     expected = [TestNotebook('1_test', '/1_test'),
-#                 TestNotebook('1_test', '/p/1_test')]
-#     assert expected == tests
-#     assert nutter.dbclient.list_objects.call_count == 2
-
-
 def test__list_tests_recursively__2test1dir2test__4_tests(mocker):
     nutter = _get_nutter(mocker)
     dbapi_client = _get_client(mocker)
@@ -245,27 +171,6 @@ def test__list_tests_recursively__2test1dir2test__4_tests(mocker):
     assert expected == tests
     assert nutter.dbclient.list_objects.call_count == 2
 
-# def test__list_suffix_tests_recursively__1test1dir2test__3_tests(mocker):
-#     nutter = _get_nutter(mocker)
-#     dbapi_client = _get_client(mocker)
-#     nutter.dbclient = dbapi_client
-#     mocker.patch.object(nutter.dbclient, 'list_objects')
-
-#     workspace_path_1 = _get_workspacepathobject(
-#         [('NOTEBOOK', '/1_test'), ('DIRECTORY', '/p')])
-#     workspace_path_2 = _get_workspacepathobject(
-#         [('NOTEBOOK', '/p/1_test'), ('NOTEBOOK', '/p/2_test')])
-
-#     nutter.dbclient.list_objects.side_effect = [
-#         workspace_path_1, workspace_path_2]
-
-#     tests = nutter.list_tests("/", True)
-#     expected = [TestNotebook('1_test', '/1_test'), TestNotebook('1_test',
-#                                                                 '/p/1_test'), TestNotebook('2_test', '/p/2_test')]
-#     assert expected == tests
-#     assert nutter.dbclient.list_objects.call_count == 2
-
-
 def test__list_tests_recursively__1test1test1dir1dir__2_test(mocker):
     nutter = _get_nutter(mocker)
     dbapi_client = _get_client(mocker)
@@ -286,27 +191,6 @@ def test__list_tests_recursively__1test1test1dir1dir__2_test(mocker):
 
     assert expected == tests
     assert nutter.dbclient.list_objects.call_count == 3
-
-# def test__list_suffix_tests_recursively__1test1dir1dir__1_test(mocker):
-#     nutter = _get_nutter(mocker)
-#     dbapi_client = _get_client(mocker)
-#     nutter.dbclient = dbapi_client
-#     mocker.patch.object(nutter.dbclient, 'list_objects')
-
-#     workspace_path_1 = _get_workspacepathobject(
-#         [('NOTEBOOK', '/1_test'), ('DIRECTORY', '/p')])
-#     workspace_path_2 = _get_workspacepathobject([('DIRECTORY', '/p/c')])
-#     workspace_path_3 = _get_workspacepathobject([])
-
-#     nutter.dbclient.list_objects.side_effect = [
-#         workspace_path_1, workspace_path_2, workspace_path_3]
-
-#     tests = nutter.list_tests("/", True)
-
-#     expected = [TestNotebook('1_test', '/1_test')]
-#     assert expected == tests
-#     assert nutter.dbclient.list_objects.call_count == 3
-
 
 def test__list_tests__notest__empty_list(mocker):
     nutter = _get_nutter(mocker)
@@ -370,48 +254,6 @@ def test__run_tests__twomatch_three_tests___nutterstatusevents_testlisting_sched
     assert status_event.event == NutterStatusEvents.TestExecutionResult
     assert status_event.data #True if success
 
-# def test__run_suffix_tests__onematch_two_tests___nutterstatusevents_testlisting_scheduling_execution_sequence_is_fired(mocker):
-#     event_handler = TestEventHandler()
-#     nutter = _get_nutter(mocker, event_handler)
-#     test_results = TestResults()
-#     test_results.append(TestResult('case',True, 10,[]))
-#     submit_response = _get_submit_run_response('SUCCESS', 'TERMINATED', test_results.serialize())
-#     dbapi_client = _get_client_for_execute_notebook(mocker, submit_response)
-
-#     nutter.dbclient = dbapi_client
-#     _mock_dbclient_list_objects(mocker, dbapi_client, [(
-#         'NOTEBOOK', '/my_test'), ('NOTEBOOK', '/abc_test')])
-
-#     results = nutter.run_tests("/my*", "cluster")
-
-#     status_event = event_handler.get_item()
-#     assert status_event.event == NutterStatusEvents.TestExecutionRequest
-#     assert status_event.data == '/my*'
-
-#     status_event = event_handler.get_item()
-#     assert status_event.event == NutterStatusEvents.TestsListing
-
-#     status_event = event_handler.get_item()
-#     assert status_event.event == NutterStatusEvents.TestsListingResults
-#     assert status_event.data == 2
-
-#     status_event = event_handler.get_item()
-#     assert status_event.event == NutterStatusEvents.TestsListingFiltered
-#     assert status_event.data == 1
-
-#     status_event = event_handler.get_item()
-#     assert status_event.event == NutterStatusEvents.TestScheduling
-#     assert status_event.data == '/my_test'
-
-#     status_event = event_handler.get_item()
-#     assert status_event.event == NutterStatusEvents.TestExecuted
-#     assert status_event.data.success
-
-#     status_event = event_handler.get_item()
-#     assert status_event.event == NutterStatusEvents.TestExecutionResult
-#     assert status_event.data #True if success
-
-
 def test__run_tests__twomatch__okay(mocker):
     nutter = _get_nutter(mocker)
     submit_response = _get_submit_run_response('SUCCESS', 'TERMINATED', '')
@@ -433,21 +275,6 @@ def test__run_tests__twomatch__okay(mocker):
     result = results[1]
     assert result.task_result_state == 'TERMINATED'
 
-# def test__run_suffix_tests__onematch__okay(mocker):
-#     nutter = _get_nutter(mocker)
-#     submit_response = _get_submit_run_response('SUCCESS', 'TERMINATED', '')
-#     dbapi_client = _get_client_for_execute_notebook(mocker, submit_response)
-
-#     nutter.dbclient = dbapi_client
-#     _mock_dbclient_list_objects(mocker, dbapi_client, [(
-#         'NOTEBOOK', '/my_test'), ('NOTEBOOK', '/my')])
-
-#     results = nutter.run_tests("/my*", "cluster")
-
-#     assert len(results) == 1
-#     result = results[0]
-#     assert result.task_result_state == 'TERMINATED'
-
 def test__run_tests_recursively__2test1dir3test__5_tests(mocker):
     nutter = _get_nutter(mocker)
     submit_response = _get_submit_run_response('SUCCESS', 'TERMINATED', '')
@@ -466,25 +293,6 @@ def test__run_tests_recursively__2test1dir3test__5_tests(mocker):
 
     tests = nutter.run_tests('/','cluster', 120, 1, True)
     assert len(tests) == 5
-
-# def test__run_suffix_tests_recursively__1test1dir2test__3_tests(mocker):
-#     nutter = _get_nutter(mocker)
-#     submit_response = _get_submit_run_response('SUCCESS', 'TERMINATED', '')
-#     dbapi_client = _get_client_for_execute_notebook(mocker, submit_response)
-#     nutter.dbclient = dbapi_client
-
-#     mocker.patch.object(nutter.dbclient, 'list_objects')
-
-#     workspace_path_1 = _get_workspacepathobject(
-#         [('NOTEBOOK', '/1_test'), ('DIRECTORY', '/p')])
-#     workspace_path_2 = _get_workspacepathobject(
-#         [('NOTEBOOK', '/p/test_1'), ('NOTEBOOK', '/p/2_test')])
-
-#     nutter.dbclient.list_objects.side_effect = [
-#         workspace_path_1, workspace_path_2]
-
-#     tests = nutter.run_tests('/','cluster', 120, 1, True)
-#     assert len(tests) == 3
 
 def test__run_tests_recursively__1dir1dir3test__3_tests(mocker):
     nutter = _get_nutter(mocker)
@@ -507,27 +315,6 @@ def test__run_tests_recursively__1dir1dir3test__3_tests(mocker):
     tests = nutter.run_tests('/','cluster', 120, 1, True)
     assert len(tests) == 3
 
-# def test__run_suffix_tests_recursively__1dir1dir2test__2_tests(mocker):
-    # nutter = _get_nutter(mocker)
-    # submit_response = _get_submit_run_response('SUCCESS', 'TERMINATED', '')
-    # dbapi_client = _get_client_for_execute_notebook(mocker, submit_response)
-    # nutter.dbclient = dbapi_client
-
-    # mocker.patch.object(nutter.dbclient, 'list_objects')
-
-    # workspace_path_1 = _get_workspacepathobject(
-    #     [('DIRECTORY', '/p')])
-    # workspace_path_2 = _get_workspacepathobject(
-    #     [('DIRECTORY', '/c')])
-    # workspace_path_3 = _get_workspacepathobject(
-    #     [('NOTEBOOK', '/p/c/1_test'), ('NOTEBOOK', '/p/c/2_test')])
-
-    # nutter.dbclient.list_objects.side_effect = [
-    #     workspace_path_1, workspace_path_2, workspace_path_3]
-
-    # tests = nutter.run_tests('/','cluster', 120, 1, True)
-    # assert len(tests) == 2
-
 def test__run_tests__twomatch__is_uppercase__okay(mocker):
     nutter = _get_nutter(mocker)
     submit_response = _get_submit_run_response('SUCCESS', 'TERMINATED', '')
@@ -542,21 +329,6 @@ def test__run_tests__twomatch__is_uppercase__okay(mocker):
     assert len(results) == 2
     assert results[0].task_result_state == 'TERMINATED'
 
-# def test__run_suffix_tests__onematch_suffix_is_uppercase__okay(mocker):
-#     nutter = _get_nutter(mocker)
-#     submit_response = _get_submit_run_response('SUCCESS', 'TERMINATED', '')
-#     dbapi_client = _get_client_for_execute_notebook(mocker, submit_response)
-
-#     nutter.dbclient = dbapi_client
-#     _mock_dbclient_list_objects(mocker, dbapi_client, [(
-#         'NOTEBOOK', '/my_TEST'), ('NOTEBOOK', '/my')])
-
-#     results = nutter.run_tests("/my*", "cluster")
-
-#     assert len(results) == 1
-#     assert results[0].task_result_state == 'TERMINATED'
-
-
 def test__run_tests__nomatch_case_sensitive__okay(mocker):
     nutter = _get_nutter(mocker)
     submit_response = _get_submit_run_response('SUCCESS', 'TERMINATED', '')
@@ -569,19 +341,6 @@ def test__run_tests__nomatch_case_sensitive__okay(mocker):
     results = nutter.run_tests("/my*", "cluster")
 
     assert len(results) == 0
-
-# def test__run_suffix_tests__nomatch_case_sensitive__okay(mocker):
-#     nutter = _get_nutter(mocker)
-#     submit_response = _get_submit_run_response('SUCCESS', 'TERMINATED', '')
-#     dbapi_client = _get_client_for_execute_notebook(mocker, submit_response)
-
-#     nutter.dbclient = dbapi_client
-#     _mock_dbclient_list_objects(mocker, dbapi_client, [(
-#         'NOTEBOOK', '/MY_test'), ('NOTEBOOK', '/my')])
-
-#     results = nutter.run_tests("/my*", "cluster")
-
-#     assert len(results) == 0
 
 def test__run_tests__fourmatches_with_pattern__okay(mocker):
     submit_response = _get_submit_run_response('SUCCESS', 'TERMINATED', '')
@@ -599,21 +358,6 @@ def test__run_tests__fourmatches_with_pattern__okay(mocker):
     assert results[1].task_result_state == 'TERMINATED'
     assert results[2].task_result_state == 'TERMINATED'
     assert results[3].task_result_state == 'TERMINATED'
-
-# def test__run_suffix_tests__twomatches_with_pattern__okay(mocker):
-#     submit_response = _get_submit_run_response('SUCCESS', 'TERMINATED', '')
-#     dbapi_client = _get_client_for_execute_notebook(mocker, submit_response)
-
-#     nutter = _get_nutter(mocker)
-#     nutter.dbclient = dbapi_client
-#     _mock_dbclient_list_objects(mocker, dbapi_client, [(
-#         'NOTEBOOK', '/my_test'), ('NOTEBOOK', '/my2_test')])
-
-#     results = nutter.run_tests("/my*", "cluster")
-
-#     assert len(results) == 2
-#     assert results[0].task_result_state == 'TERMINATED'
-#     assert results[1].task_result_state == 'TERMINATED'
 
 def test__run_tests__with_invalid_pattern__valueerror(mocker):
     submit_response = _get_submit_run_response('SUCCESS', 'TERMINATED', '')
@@ -638,19 +382,6 @@ def test__run_tests__nomatches__okay(mocker):
     results = nutter.run_tests("/abc*", "cluster")
 
     assert len(results) == 0
-
-# def test__run_suffix_tests__nomatches__okay(mocker):
-#     submit_response = _get_submit_run_response('SUCCESS', 'TERMINATED', '')
-#     dbapi_client = _get_client_for_execute_notebook(mocker, submit_response)
-#     nutter = _get_nutter(mocker)
-#     nutter.dbclient = dbapi_client
-#     _mock_dbclient_list_objects(mocker, dbapi_client, [(
-#         'NOTEBOOK', '/my_test'), ('NOTEBOOK', '/my2_test')])
-
-#     results = nutter.run_tests("/abc*", "cluster")
-
-#     assert len(results) == 0
-
 
 def test__to_testresults__none_output__none(mocker):
     output = None
