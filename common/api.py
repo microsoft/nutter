@@ -212,14 +212,17 @@ class TestNotebook(object):
 
         self.name = name
         self.path = path
-        if name.lower().startswith('test_'):
-            self.test_name = name.split("_")[1]
-        if name.lower().endswith('_test'):
-            self.test_name = name.split("_")[0]
+        self.test_name = self.get_test_name(name)
 
     def __eq__(self, obj):
         is_equal = obj.name == self.name and obj.path == self.path
         return isinstance(obj, TestNotebook) and is_equal
+    
+    def get_test_name(self, name):
+        if name.lower().startswith('test_'):
+            return name.split("_")[1]
+        if name.lower().endswith('_test'):
+            return name.split("_")[0]
 
     @classmethod
     def from_path(cls, path):
