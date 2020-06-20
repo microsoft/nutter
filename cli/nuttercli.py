@@ -141,7 +141,7 @@ class NutterCLI(object):
         segments = pattern.split('/')
         if len(segments) > 0:
             search_pattern = segments[len(segments)-1]
-            if search_pattern.lower().startswith('test_'):
+            if api.TestNotebook._is_valid_test_name(search_pattern):
                 return False
             return True
         logging.Fatal(
