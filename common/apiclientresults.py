@@ -6,6 +6,7 @@ Licensed under the MIT license.
 from . import utils
 from abc import ABCMeta
 from .testresult import TestResults
+import common.api as api
 import logging
 
 
