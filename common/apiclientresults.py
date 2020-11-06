@@ -6,7 +6,6 @@ Licensed under the MIT license.
 from . import utils
 from abc import ABCMeta
 from .testresult import TestResults
-import common.api as api
 import logging
 
 
@@ -157,7 +156,7 @@ class NotebookObject(WorkspaceObject):
 
     @property
     def is_test_notebook(self):
-        return api.TestNotebook._is_valid_test_name(self.name)
+        return utils.contains_test_prefix_or_surfix(self.name)
 
 
 class Directory(WorkspaceObject):

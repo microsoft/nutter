@@ -4,6 +4,7 @@ Licensed under the MIT license.
 """
 
 from abc import abstractmethod, ABCMeta
+from . import utils
 from .testresult import TestResults
 from . import scheduler
 from . import apiclient
@@ -233,10 +234,8 @@ class TestNotebook(object):
 
     @classmethod
     def _is_valid_test_name(cls, name):
-        if name is None:
-            return False
-
-        return name.lower().startswith('test_') or name.lower().endswith('_test')
+        return utils.contains_test_prefix_or_surfix(name)
+        
 
     @classmethod
     def _get_notebook_name_from_path(cls, path):

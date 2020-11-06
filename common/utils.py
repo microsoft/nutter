@@ -17,3 +17,10 @@ def recursive_find(dict_instance, keys):
     if len(keys) == 1:
         return value
     return recursive_find(value, keys[1:len(keys)])
+
+
+def contains_test_prefix_or_surfix(name):
+    if name is None:
+            return False
+
+    return name.lower().startswith('test_') or name.lower().endswith('_test')
