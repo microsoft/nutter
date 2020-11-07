@@ -25,7 +25,7 @@ class DatabricksAPIClient(object):
     """
     """
 
-    def __init__(self):
+    def __init__(self, pull_wait_time=10):
         config = cfg.get_auth_config()
         self.min_timeout = MIN_TIMEOUT
 

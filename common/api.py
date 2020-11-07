@@ -222,7 +222,7 @@ class TestNotebook(object):
     def __eq__(self, obj):
         is_equal = obj.name == self.name and obj.path == self.path
         return isinstance(obj, TestNotebook) and is_equal
-    
+
     def get_test_name(self, name):
         if name.lower().startswith('test_'):
             return name.split("_")[1]
