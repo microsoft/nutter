@@ -218,7 +218,7 @@ class TestNotebook(object):
     def __eq__(self, obj):
         is_equal = obj.name == self.name and obj.path == self.path
         return isinstance(obj, TestNotebook) and is_equal
-    
+
     def get_test_name(self, name):
         if name.lower().startswith('test_'):
             return name.split("_")[1]
@@ -235,7 +235,6 @@ class TestNotebook(object):
     @classmethod
     def _is_valid_test_name(cls, name):
         return utils.contains_test_prefix_or_surfix(name)
-        
 
     @classmethod
     def _get_notebook_name_from_path(cls, path):

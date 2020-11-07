@@ -6,6 +6,7 @@ Licensed under the MIT license.
 import pytest
 from common.httpretrier import HTTPRetrier
 import requests
+import io
 from requests.exceptions import HTTPError
 from databricks_api import DatabricksAPI
 
@@ -59,6 +60,23 @@ def test__execute__raises_500_http_exception__retries_twice_and_raises(mocker):
     mock_request = mocker.patch.object(db.client.session, 'request')
     mock_resp = requests.models.Response()
     mock_resp.status_code = 500
+    mock_request.return_value = mock_resp
+
+    with pytest.raises(HTTPError):
+        return_value = retrier.execute(db.jobs.get_run_output, 1)
+    assert retrier._tries == 2
+
+def test__execute__raises_invalid_state_http_exception__retries_twice_and_raises(mocker):
+    retrier =  HTTPRetrier(2,1)
+
+    db = DatabricksAPI(host='HOST',token='TOKEN')
+    mock_request = mocker.patch.object(db.client.session, 'request')
+    response_body = " { 'error_code': 'INVALID_STATE', 'message': 'Run result is empty. " + \
+                    " There may have been issues while saving or reading results.'} "
+
+    mock_resp = requests.models.Response()
+    mock_resp.status_code = 400
+    mock_resp.raw = io.BytesIO(bytes(response_body, 'utf-8'))
     mock_request.return_value = mock_resp
 
     with pytest.raises(HTTPError):

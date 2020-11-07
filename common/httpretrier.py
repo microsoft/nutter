@@ -32,10 +32,16 @@ class HTTPRetrier(object):
                     raise
                 if isinstance(exc.response.status_code, int):
                     if exc.response.status_code < 500:
-                        raise
+                        if not self._is_invalid_state_response(exc.response):
+                            raise
             if retry:
                 logging.debug(
                     'Retrying in {0}s, {1} of {2} retries'
                     .format(str(waitfor), str(self._tries+1), str(self._max_retries)))
                 sleep(waitfor)
             self._tries = self._tries + 1
+
+    def _is_invalid_state_response(self, response):
+        if response.status_code == 400:
+            return 'INVALID_STATE' in response.text
+        return False
