@@ -23,9 +23,10 @@ class DatabricksAPIClient(object):
     """
     """
 
-    def __init__(self):
+    def __init__(self, pull_wait_time=10):
         config = cfg.get_auth_config()
         self.min_timeout = 10
+        self.pull_wait_time = 10
 
         if config is None:
             raise InvalidConfigurationException
@@ -100,7 +101,7 @@ class DatabricksAPIClient(object):
             # All these are terminal states
             if lcs == 'TERMINATED' or lcs == 'SKIPPED' or lcs == 'INTERNAL_ERROR':
                 return lcs, output
-            time.sleep(1)
+            time.sleep(self.pull_wait_time)
         self._raise_timeout(output)
 
     def _raise_timeout(self, output):
