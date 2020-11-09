@@ -315,6 +315,7 @@ FLAGS
     --tags_report          Create a CSV report from the test results that includes the test cases tags.
     --max_parallel_tests   Sets the level of parallelism for test notebook execution.
     --recursive            Executes all tests in the hierarchical folder structure. 
+    --poll_wait_time       Polling interval duration for notebook status. Default is 5 (5 seconds).
 ```
 
 __Note:__ You can also use flags syntax for POSITIONAL ARGUMENTS
