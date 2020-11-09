@@ -156,13 +156,7 @@ class NotebookObject(WorkspaceObject):
 
     @property
     def is_test_notebook(self):
-        return self._is_valid_test_name(self.name)
-
-    def _is_valid_test_name(self, name):
-        if name is None:
-            return False
-
-        return name.lower().startswith('test_')
+        return utils.contains_test_prefix_or_surfix(self.name)
 
 
 class Directory(WorkspaceObject):

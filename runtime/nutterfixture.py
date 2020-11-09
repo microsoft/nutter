@@ -54,6 +54,12 @@ class NutterFixture(object):
         return TestExecResults(self.test_results)
 
     def __load_fixture(self):
+        if hasattr(self, 'data_loader') is False:
+            msg = """ If you have an __init__ method in your test class.
+                      Make sure you make a call to initialize the parent class.
+                      For example: super().__init__() """
+            raise InitializationException(msg)
+
         test_case_dict = self.data_loader.load_fixture(self)
         if test_case_dict is None:
             logging.fatal("Invalid Test Fixture")
@@ -72,4 +78,9 @@ class NutterFixture(object):
 
 
 class InvalidTestFixtureException(Exception):
-    pass
+    def __init__(self, message):
+        super().__init__(message)
+
+class InitializationException(Exception):
+    def __init__(self, message):
+        super().__init__(message)

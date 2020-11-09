@@ -4,6 +4,8 @@ Licensed under the MIT license.
 """
 
 from abc import abstractmethod, ABCMeta
+from common.apiclient import DEFAULT_POLL_WAIT_TIME
+from . import utils
 from .testresult import TestResults
 from . import scheduler
 from . import apiclient
@@ -85,19 +87,22 @@ class Nutter(NutterApi):
 
         return tests
 
-    def run_test(self, testpath, cluster_id, timeout=120):
+    def run_test(self, testpath, cluster_id,
+                 timeout=120, pull_wait_time=DEFAULT_POLL_WAIT_TIME):
         self._add_status_event(NutterStatusEvents.TestExecutionRequest, testpath)
         test_notebook = TestNotebook.from_path(testpath)
         if test_notebook is None:
             raise InvalidTestException
 
         result = self.dbclient.execute_notebook(
-            test_notebook.path, cluster_id, timeout=timeout)
+            test_notebook.path, cluster_id,
+            timeout=timeout, pull_wait_time=pull_wait_time)
 
         return result
 
     def run_tests(self, pattern, cluster_id,
-                  timeout=120, max_parallel_tests=1, recursive=False):
+                  timeout=120, max_parallel_tests=1, recursive=False,
+                  poll_wait_time=DEFAULT_POLL_WAIT_TIME):
 
         self._add_status_event(NutterStatusEvents.TestExecutionRequest, pattern)
         root, pattern_to_match = self._get_root_and_pattern(pattern)
@@ -114,7 +119,7 @@ class Nutter(NutterApi):
             NutterStatusEvents.TestsListingFiltered, len(filtered_notebooks))
 
         return self._schedule_and_run(
-            filtered_notebooks, cluster_id, max_parallel_tests, timeout)
+            filtered_notebooks, cluster_id, max_parallel_tests, timeout, poll_wait_time)
 
     def events_processor_wait(self):
         if self._events_processor is None:
@@ -163,7 +168,7 @@ class Nutter(NutterApi):
         return root, valid_pattern
 
     def _schedule_and_run(self, test_notebooks, cluster_id,
-                          max_parallel_tests, timeout):
+                          max_parallel_tests, timeout, pull_wait_time):
         func_scheduler = scheduler.get_scheduler(max_parallel_tests)
         for test_notebook in test_notebooks:
             self._add_status_event(
@@ -171,12 +176,12 @@ class Nutter(NutterApi):
             logging.debug(
                 'Scheduling execution of: {}'.format(test_notebook.path))
             func_scheduler.add_function(self._execute_notebook,
-                                        test_notebook.path, cluster_id, timeout)
+                                        test_notebook.path, cluster_id, timeout, pull_wait_time)
         return self._run_and_await(func_scheduler)
 
-    def _execute_notebook(self, test_notebook_path, cluster_id, timeout):
+    def _execute_notebook(self, test_notebook_path, cluster_id, timeout, pull_wait_time):
         result = self.dbclient.execute_notebook(test_notebook_path,
-                                                cluster_id, None, timeout)
+                                                cluster_id, None, timeout, pull_wait_time)
         self._add_status_event(NutterStatusEvents.TestExecuted,
                                ExecutionResultEventData.from_execution_results(result))
         logging.debug('Executed: {}'.format(test_notebook_path))
@@ -212,11 +217,17 @@ class TestNotebook(object):
 
         self.name = name
         self.path = path
-        self.test_name = name.split("_")[1]
+        self.test_name = self.get_test_name(name)
 
     def __eq__(self, obj):
         is_equal = obj.name == self.name and obj.path == self.path
         return isinstance(obj, TestNotebook) and is_equal
+
+    def get_test_name(self, name):
+        if name.lower().startswith('test_'):
+            return name.split("_")[1]
+        if name.lower().endswith('_test'):
+            return name.split("_")[0]
 
     @classmethod
     def from_path(cls, path):
@@ -227,10 +238,7 @@ class TestNotebook(object):
 
     @classmethod
     def _is_valid_test_name(cls, name):
-        if name is None:
-            return False
-
-        return name.lower().startswith('test_')
+        return utils.contains_test_prefix_or_surfix(name)
 
     @classmethod
     def _get_notebook_name_from_path(cls, path):

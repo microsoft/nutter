@@ -4,7 +4,7 @@ Licensed under the MIT license.
 """
 
 import pytest
-from runtime.nutterfixture import NutterFixture, tag, InvalidTestFixtureException
+from runtime.nutterfixture import NutterFixture, tag, InvalidTestFixtureException, InitializationException
 from runtime.testcase import TestCase
 from runtime.fixtureloader import FixtureLoader
 from common.testresult  import TestResult, TestResults
@@ -239,6 +239,14 @@ def test__execute_tests__test_names_not_in_order_in_class__tests_executed_in_alp
     # Assert
     assert '1wxyz' == fix.get_method_order()
 
+def test__execute_tests__subclass_init_does_not_call_NutterFixture_init__throws_InitializationException():
+    # Arrange
+    fix = TestFixtureThatDoesNotCallBaseCtor()
+
+    # Act
+    with pytest.raises(InitializationException):
+        fix.execute_tests()
+
 def test__run_test_method__has_list_tag_decorator__list_set_on_method():
     # Arrange
     class Wrapper(NutterFixture):
@@ -376,3 +384,10 @@ class OutOfOrderTestFixture(NutterFixture):
     
     def get_method_order(self):
         return self.__method_order
+
+class TestFixtureThatDoesNotCallBaseCtor(NutterFixture):
+    def __init__(self):
+        pass
+
+    def assertion_test_case(self):
+        assert 1 == 1
