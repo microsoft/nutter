@@ -11,6 +11,8 @@ from .apiclientresults import ExecuteNotebookResult, WorkspacePath
 from .httpretrier import HTTPRetrier
 import logging
 
+DEFAULT_POLL_WAIT_TIME = 5
+MIN_TIMEOUT = 10
 
 def databricks_client():
 
@@ -18,8 +20,6 @@ def databricks_client():
 
     return db
 
-DEFAULT_POLL_WAIT_TIME = 5
-MIN_TIMEOUT = 10
 
 class DatabricksAPIClient(object):
     """
@@ -28,7 +28,7 @@ class DatabricksAPIClient(object):
     def __init__(self):
         config = cfg.get_auth_config()
         self.min_timeout = MIN_TIMEOUT
-        
+
         if config is None:
             raise InvalidConfigurationException
 

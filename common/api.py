@@ -87,14 +87,16 @@ class Nutter(NutterApi):
 
         return tests
 
-    def run_test(self, testpath, cluster_id, timeout=120, pull_wait_time=DEFAULT_POLL_WAIT_TIME):
+    def run_test(self, testpath, cluster_id,
+                 timeout=120, pull_wait_time=DEFAULT_POLL_WAIT_TIME):
         self._add_status_event(NutterStatusEvents.TestExecutionRequest, testpath)
         test_notebook = TestNotebook.from_path(testpath)
         if test_notebook is None:
             raise InvalidTestException
 
         result = self.dbclient.execute_notebook(
-            test_notebook.path, cluster_id, timeout=timeout,pull_wait_time=pull_wait_time)
+            test_notebook.path, cluster_id,
+            timeout=timeout, pull_wait_time=pull_wait_time)
 
         return result
 
