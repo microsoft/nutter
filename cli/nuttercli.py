@@ -9,7 +9,7 @@ import os
 import datetime
 
 import common.api as api
-from common.apiclient import InvalidConfigurationException
+from common.apiclient import DEFAULT_POLL_WAIT_TIME, InvalidConfigurationException
 
 import common.resultsview as view
 from .eventhandlers import ConsoleEventHandler
@@ -17,7 +17,7 @@ from .resultsvalidator import ExecutionResultsValidator
 from .reportsman import ReportWriters
 from . import reportsman as reports
 
-__version__ = '0.1.33'
+__version__ = '0.1.34'
 
 BUILD_NUMBER_ENV_VAR = 'NUTTER_BUILD_NUMBER'
 
@@ -53,7 +53,7 @@ class NutterCLI(object):
     def run(self, test_pattern, cluster_id,
             timeout=120, junit_report=False,
             tags_report=False, max_parallel_tests=1,
-            recursive=False):
+            recursive=False, poll_wait_time=DEFAULT_POLL_WAIT_TIME):
         try:
             logging.debug(""" Running tests. test_pattern: {} cluster_id: {} timeout: {}
                                junit_report: {} max_parallel_tests: {}
@@ -67,14 +67,15 @@ class NutterCLI(object):
             if self._is_a_test_pattern(test_pattern):
                 logging.debug('Executing pattern')
                 results = self._nutter.run_tests(
-                    test_pattern, cluster_id, timeout, max_parallel_tests, recursive)
+                    test_pattern, cluster_id, timeout,
+                    max_parallel_tests, recursive, poll_wait_time)
                 self._nutter.events_processor_wait()
                 self._handle_results(results, junit_report, tags_report)
                 return
 
             logging.debug('Executing single test')
             result = self._nutter.run_test(test_pattern, cluster_id,
-                                           timeout)
+                                           timeout, poll_wait_time)
 
             self._handle_results([result], junit_report, tags_report)
 

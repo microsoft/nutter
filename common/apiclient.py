@@ -18,16 +18,17 @@ def databricks_client():
 
     return db
 
+DEFAULT_POLL_WAIT_TIME = 5
+MIN_TIMEOUT = 10
 
 class DatabricksAPIClient(object):
     """
     """
 
-    def __init__(self, pull_wait_time=10):
+    def __init__(self):
         config = cfg.get_auth_config()
-        self.min_timeout = 10
-        self.pull_wait_time = 10
-
+        self.min_timeout = MIN_TIMEOUT
+        
         if config is None:
             raise InvalidConfigurationException
 
@@ -56,7 +57,8 @@ class DatabricksAPIClient(object):
         return workspace_path_obj
 
     def execute_notebook(self, notebook_path, cluster_id,
-                         notebook_params=None, timeout=120):
+                         notebook_params=None, timeout=120,
+                         pull_wait_time=DEFAULT_POLL_WAIT_TIME):
         if not notebook_path:
             raise ValueError("empty path")
         if not cluster_id:
@@ -67,6 +69,8 @@ class DatabricksAPIClient(object):
         if notebook_params is not None:
             if not isinstance(notebook_params, dict):
                 raise ValueError("Parameters must be a dictionary")
+        if pull_wait_time <= 1:
+            pull_wait_time = DEFAULT_POLL_WAIT_TIME
 
         name = str(uuid.uuid1())
         ntask = self.__get_notebook_task(notebook_path, notebook_params)
@@ -81,11 +85,11 @@ class DatabricksAPIClient(object):
             raise NotebookTaskRunIDMissingException
 
         life_cycle_state, output = self.__pull_for_output(
-            runid['run_id'], timeout)
+            runid['run_id'], timeout, pull_wait_time)
 
         return ExecuteNotebookResult.from_job_output(output)
 
-    def __pull_for_output(self, run_id, timeout):
+    def __pull_for_output(self, run_id, timeout, pull_wait_time):
         timedout = time.time() + timeout
         output = {}
         while time.time() < timedout:
@@ -100,8 +104,11 @@ class DatabricksAPIClient(object):
             # https://docs.azuredatabricks.net/api/latest/jobs.html#jobsrunlifecyclestate
             # All these are terminal states
             if lcs == 'TERMINATED' or lcs == 'SKIPPED' or lcs == 'INTERNAL_ERROR':
+                logging.debug('Terminal state returned. {}'.format(lcs))
                 return lcs, output
-            time.sleep(self.pull_wait_time)
+            logging.debug('Not terminal state returned. Sleeping {}s'.format(pull_wait_time))
+            time.sleep(pull_wait_time)
+
         self._raise_timeout(output)
 
     def _raise_timeout(self, output):
