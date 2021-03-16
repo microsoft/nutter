@@ -32,6 +32,10 @@ class TestResultsReportWriter(object):
     def write(self):
         pass
 
+    @abstractmethod
+    def write_to_dbfs(self, dbfs_path):
+        pass
+
     def _validate_add_results(self, notebook_path, test_result):
         if not isinstance(test_result, TestResults):
             raise ValueError('Expected an instance of TestResults')
@@ -85,6 +89,10 @@ class TagsReportWriter(TestResultsReportWriter):
 
         return report_name
 
+    def write_to_dbfs(self, dbfs_path):
+        self.to_file(dbfs_path)
+        return dbfs_path
+
     def to_file(self, path):
         file = open(path, 'w')
         try:
@@ -136,6 +144,10 @@ class JunitXMLReportWriter(TestResultsReportWriter):
         self.to_file(report_name)
 
         return report_name
+
+    def write_to_dbfs(self, dbfs_path):
+        self.to_file(dbfs_path)
+        return dbfs_path
 
     def to_file(self, path):
         file = open(path, 'w')

@@ -4,6 +4,7 @@ Licensed under the MIT license.
 """
 
 from .apiclientresults import ExecuteNotebookResult, NotebookOutputResult
+from .resultreports import JunitXMLReportWriter
 from .resultsview import RunCommandResultsView
 from .testresult import TestResults
 
@@ -31,3 +32,10 @@ class TestExecResults():
             'N/A', None, test_results)
 
         return ExecuteNotebookResult('N/A', 'N/A', notebook_result, 'N/A')
+
+    def write_junit_xml_report_to_dbfs(self, notebook_path, dbfs_report_path):
+        junit_xml_report_writer = JunitXMLReportWriter()
+        junit_xml_report_writer.add_result(notebook_path, self.test_results)
+        junit_xml_report_writer.write_to_dbfs(dbfs_report_path)
+        return dbfs_report_path
+
