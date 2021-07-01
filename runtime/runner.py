@@ -14,18 +14,24 @@ from runtime.nutterfixture import NutterFixture
 class NutterFixtureParallelRunner(object):
     """Helper class to execute tests in parallel."""
 
-    def __init__(self, tests, num_of_workers=1):
+    def __init__(self, num_of_workers=1):
         """Initialize the runner.
 
         Args:
-            tests (list): the list of tests to execute.
             num_of_workers (int): number of parallel workers.
         """
-        for i in tests:
-            if not isinstance(i, NutterFixture):
-                raise TypeError("tests elements must be of type NutterFixture")
-        self.tests = tests
+        self.tests = []
         self.num_of_workers = num_of_workers
+
+    def add_test_fixture(self, fixture):
+        """Add a test to the list of tests to run.
+
+        Args:
+            fixture (NutterFixture): the test to add.
+        """
+        if not isinstance(fixture, NutterFixture):
+            raise TypeError("fixture must be of type NutterFixture")
+        self.tests.append(fixture)
 
     def execute(self):
         """Execute the tests."""

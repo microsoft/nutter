@@ -24,17 +24,16 @@ test_cases = [
 @pytest.mark.parametrize('num_of_tests, num_of_workers', test_cases)
 def test__execute_tests__x_tests_x_workers__results_ok(num_of_tests, num_of_workers):
     # Assemble list of tests
-    tests = []
+    runner = NutterFixtureParallelRunner(num_of_workers)
     for i in range(num_of_tests):
         test_case = RunnerTestFixture()
-        tests.append(test_case)
+        runner.add_test_fixture(test_case)
 
     # Execute tests
-    runner = NutterFixtureParallelRunner(tests, num_of_workers)
     results = runner.execute()
 
     # Assert results
-    assert len(results.test_results.results) == len(tests)
+    assert len(results.test_results.results) == num_of_tests
     assert results.test_results.passed() == True
 
 def test__execute_tests__3_tests_in_sequence_with_failed_assertion__results_ok():
@@ -45,8 +44,11 @@ def test__execute_tests__3_tests_in_sequence_with_failed_assertion__results_ok()
         RunnerTestFixture()
     ]
 
+    runner = NutterFixtureParallelRunner()
+    for i in tests:
+        runner.add_test_fixture(i)
+
     # Act
-    runner = NutterFixtureParallelRunner(tests, 1)
     results = runner.execute()
 
     # Assert
@@ -63,8 +65,11 @@ def test__execute_tests__3_tests_in_sequence_with_run_exception__results_ok():
         RunnerTestFixture()
     ]
 
+    runner = NutterFixtureParallelRunner()
+    for i in tests:
+        runner.add_test_fixture(i)
+
     # Act
-    runner = NutterFixtureParallelRunner(tests, 1)
     results = runner.execute()
 
     # Assert
@@ -81,8 +86,11 @@ def test__execute_tests__3_tests_in_sequence_with_exec_exception__results_ok():
         RunnerTestFixture()
     ]
 
+    runner = NutterFixtureParallelRunner()
+    for i in tests:
+        runner.add_test_fixture(i)
+
     # Act
-    runner = NutterFixtureParallelRunner(tests, 1)
     results = runner.execute()
 
     # Assert
