@@ -11,7 +11,7 @@ from common.testresult import TestResults
 from runtime.nutterfixture import NutterFixture
 
 
-class NutterRunner(object):
+class NutterFixtureParallelRunner(object):
     """Helper class to execute tests in parallel."""
 
     def __init__(self, tests, num_of_workers=1):

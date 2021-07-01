@@ -9,7 +9,7 @@ import time
 import pytest
 
 from runtime.nutterfixture import NutterFixture
-from runtime.runner import NutterRunner
+from runtime.runner import NutterFixtureParallelRunner
 
 test_cases = [
     (1, 1),
@@ -30,7 +30,7 @@ def test__execute_tests__x_tests_x_workers__results_ok(num_of_tests, num_of_work
         tests.append(test_case)
 
     # Execute tests
-    runner = NutterRunner(tests, num_of_workers)
+    runner = NutterFixtureParallelRunner(tests, num_of_workers)
     results = runner.execute_tests()
 
     # Assert results
@@ -46,7 +46,7 @@ def test__execute_tests__3_tests_in_sequence_with_failed_assertion__results_ok()
     ]
 
     # Act
-    runner = NutterRunner(tests, 1)
+    runner = NutterFixtureParallelRunner(tests, 1)
     results = runner.execute_tests()
 
     # Assert
@@ -64,7 +64,7 @@ def test__execute_tests__3_tests_in_sequence_with_run_exception__results_ok():
     ]
 
     # Act
-    runner = NutterRunner(tests, 1)
+    runner = NutterFixtureParallelRunner(tests, 1)
     results = runner.execute_tests()
 
     # Assert
@@ -82,7 +82,7 @@ def test__execute_tests__3_tests_in_sequence_with_exec_exception__results_ok():
     ]
 
     # Act
-    runner = NutterRunner(tests, 1)
+    runner = NutterFixtureParallelRunner(tests, 1)
     results = runner.execute_tests()
 
     # Assert
