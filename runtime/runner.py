@@ -27,7 +27,7 @@ class NutterFixtureParallelRunner(object):
         self.tests = tests
         self.num_of_workers = num_of_workers
 
-    def execute_tests(self):
+    def execute(self):
         """Execute the tests."""
         sched = scheduler.get_scheduler(self.num_of_workers)
 
