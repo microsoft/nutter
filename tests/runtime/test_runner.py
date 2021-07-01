@@ -31,7 +31,7 @@ def test__execute_tests__x_tests_x_workers__results_ok(num_of_tests, num_of_work
 
     # Execute tests
     runner = NutterFixtureParallelRunner(tests, num_of_workers)
-    results = runner.execute_tests()
+    results = runner.execute()
 
     # Assert results
     assert len(results.test_results.results) == len(tests)
@@ -47,7 +47,7 @@ def test__execute_tests__3_tests_in_sequence_with_failed_assertion__results_ok()
 
     # Act
     runner = NutterFixtureParallelRunner(tests, 1)
-    results = runner.execute_tests()
+    results = runner.execute()
 
     # Assert
     assert len(results.test_results.results) == len(tests)
@@ -65,7 +65,7 @@ def test__execute_tests__3_tests_in_sequence_with_run_exception__results_ok():
 
     # Act
     runner = NutterFixtureParallelRunner(tests, 1)
-    results = runner.execute_tests()
+    results = runner.execute()
 
     # Assert
     assert len(results.test_results.results) == len(tests)
@@ -83,7 +83,7 @@ def test__execute_tests__3_tests_in_sequence_with_exec_exception__results_ok():
 
     # Act
     runner = NutterFixtureParallelRunner(tests, 1)
-    results = runner.execute_tests()
+    results = runner.execute()
 
     # Assert
     assert len(results.test_results.results) == len(tests) - 1
