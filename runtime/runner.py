@@ -45,6 +45,6 @@ class NutterFixtureParallelRunner(object):
         for funcres in results:
             if funcres.func_result is not None:
                 for testres in funcres.func_result.test_results.results:
-                    all_results.append(funcres.func_result.test_results.results)
+                    all_results.append(testres)
 
         return TestExecResults(all_results)
