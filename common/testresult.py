@@ -3,9 +3,13 @@ Copyright (c) Microsoft Corporation.
 Licensed under the MIT license.
 """
 
-from .pickleserializable import PickleSerializable
-import pickle
 import base64
+import pickle
+
+from py4j.protocol import Py4JJavaError
+
+from .pickleserializable import PickleSerializable
+
 
 def get_test_results():
     return TestResults()
@@ -30,6 +34,9 @@ class TestResults(PickleSerializable):
         self.total_execution_time = total_execution_time
 
     def serialize(self):
+        for i in self.results:
+            if isinstance(i.exception, Py4JJavaError):
+                i.exception = Exception(str(i.exception))
         bin_data = pickle.dumps(self)
         return str(base64.encodebytes(bin_data), "utf-8")
 

@@ -3,11 +3,15 @@ Copyright (c) Microsoft Corporation.
 Licensed under the MIT license.
 """
 
-import pytest
-import json
-from common.testresult import TestResults, TestResult
-import pickle
 import base64
+import json
+import pickle
+
+import pytest
+from common.testresult import TestResult, TestResults
+from py4j.java_gateway import JavaGateway
+from py4j.protocol import Py4JJavaError, Py4JError
+
 
 def test__testresults_append__type_not_testresult__throws_error():
     # Arrange
@@ -74,6 +78,23 @@ def test__deserialize__invalid_pickle_data__throws_Exception():
     with pytest.raises(Exception):
         test_results.deserialize(invalid_pickle)
 
+def test__deserialize__p4jjavaerror__is_serializable_and_deserializable():
+    # Arrange
+    test_results = TestResults()
+
+    try:
+        py4j_exception = get_py4j_exception()
+    except Py4JError:
+        pytest.skip("Py4J not available")
+
+    test_results.append(TestResult("Test Name", True, 1, [], py4j_exception))
+
+    serialized_data = test_results.serialize()
+
+    deserialized_data = TestResults().deserialize(serialized_data)
+
+    assert test_results == deserialized_data
+
 
 def test__eq__test_results_equal_but_not_same_ref__are_equal():
     # Arrange
@@ -139,3 +160,15 @@ def test__deserialize__data_is_base64_str__can_deserialize():
     test_results_from_data = TestResults().deserialize(serialized_str)
 
     assert test_results == test_results_from_data
+
+
+def get_py4j_exception():
+    # Raise a Py4JJavaError
+    # NB: a running Py4J Java Gateway is required for this to work.
+    gateway = JavaGateway()
+    random = gateway.jvm.java.util.Random()
+    try:
+        _ = random.nextInt(-1)
+    except Py4JJavaError as e:
+        _ex = e
+    return _ex
