@@ -1,0 +1,10 @@
+{
+    "image": "python:3.5.2",
+
+    // Run Bash script in .devcontainer directory
+	"onCreateCommand": "/bin/bash .devcontainer/on-create.sh",
+	
+	"extensions": [
+		"ms-python.python"
+	]
+}
