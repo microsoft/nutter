@@ -56,9 +56,9 @@ class DatabricksAPIClient(object):
 
         return workspace_path_obj
 
-    def execute_notebook(self, notebook_path, cluster_id,
-                         notebook_params=None, timeout=120,
-                         pull_wait_time=DEFAULT_POLL_WAIT_TIME):
+    def execute_notebook(self, notebook_path, cluster_id, timeout=120,
+                         pull_wait_time=DEFAULT_POLL_WAIT_TIME,
+                         notebook_params=None):
         if not notebook_path:
             raise ValueError("empty path")
         if not cluster_id:

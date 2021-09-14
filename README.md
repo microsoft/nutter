@@ -316,6 +316,9 @@ FLAGS
     --max_parallel_tests   Sets the level of parallelism for test notebook execution.
     --recursive            Executes all tests in the hierarchical folder structure. 
     --poll_wait_time       Polling interval duration for notebook status. Default is 5 (5 seconds).
+    --notebook_params      Allows parameters to be passed from the CLI tool to the test notebook. From the 
+                           notebook, these parameters can then be accessed by the notebook using 
+                           the 'dbutils.widgets.get('key')' syntax.
 ```
 
 __Note:__ You can also use flags syntax for POSITIONAL ARGUMENTS
@@ -434,6 +437,9 @@ steps:
     testRunTitle: 'Publish Nutter results'
   condition: succeededOrFailed()
 ```
+
+### Debugging Locally
+If using Visual Studio Code, you can use the `example_launch.json` file provided, editing the variables in the `<>` symbols to match your environment. You should be able to use the debugger to see the test run results, much the same as you would in Azure Devops.
 
 ## Contributing
 
