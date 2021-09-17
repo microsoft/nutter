@@ -319,6 +319,7 @@ FLAGS
     --notebook_params      Allows parameters to be passed from the CLI tool to the test notebook. From the 
                            notebook, these parameters can then be accessed by the notebook using 
                            the 'dbutils.widgets.get('key')' syntax.
+
 ```
 
 __Note:__ You can also use flags syntax for POSITIONAL ARGUMENTS
