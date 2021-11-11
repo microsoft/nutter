@@ -254,10 +254,10 @@ The ```run``` command  schedules the execution of test notebooks and waits for t
 
 ### Run single test notebook
 
-The following command executes the test notebook ```/dataload/test_sourceLoad``` in the cluster ```0123-12334-tonedabc```.
+The following command executes the test notebook ```/dataload/test_sourceLoad``` in the cluster ```0123-12334-tonedabc``` with the notebook_param key-value pairs of ```{"example_key_1": "example_value_1", "example_key_2": "example_value_2"}``` (Please note the escaping of quotes):
 
 ```bash
-nutter run dataload/test_sourceLoad --cluster_id 0123-12334-tonedabc
+nutter run dataload/test_sourceLoad --cluster_id 0123-12334-tonedabc --notebook_params "{\"example_key_1\": \"example_value_1\", \"example_key_2\": \"example_value_2\"}"
 ```
 
 __Note:__ In Azure Databricks you can get the cluster ID by selecting a cluster name from the Clusters tab and clicking on the JSON view.
@@ -267,10 +267,10 @@ __Note:__ In Azure Databricks you can get the cluster ID by selecting a cluster 
 The Nutter CLI supports the execution of multiple notebooks via name pattern matching. The Nutter CLI applies the pattern to the name of test notebook **without** the *test_* prefix. The CLI also expects that you omit the prefix when specifying the pattern.
 
 
-Say the *dataload* folder has the following test notebooks: *test_srcLoad* and *test_srcValidation*. The following command will result in the execution of both tests.
+Say the *dataload* folder has the following test notebooks: *test_srcLoad* and *test_srcValidation* with the notebook_param key-value pairs of ```{"example_key_1": "example_value_1", "example_key_2": "example_value_2"}```. The following command will result in the execution of both tests.
 
 ```bash
-nutter run dataload/src* --cluster_id 0123-12334-tonedabc
+nutter run dataload/src* --cluster_id 0123-12334-tonedabc --notebook_params "{\"example_key_1\": \"example_value_1\", \"example_key_2\": \"example_value_2\"}" 
 ```
 
 In addition, if you have tests in a hierarchical folder structure, you can recursively execute all tests by setting the ```--recursive``` flag.
