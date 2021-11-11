@@ -68,7 +68,7 @@ class DatabricksAPIClient(object):
                 "Timeout must be greater than {}".format(self.min_timeout))
         if notebook_params is not None:
             if not isinstance(notebook_params, dict):
-                raise ValueError("Parameters must be a dictionary")
+                raise ValueError("Parameters must be in the form of a dictionary (See #run-single-test-notebook section in README)")
         if pull_wait_time <= 1:
             pull_wait_time = DEFAULT_POLL_WAIT_TIME
 
