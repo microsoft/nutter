@@ -88,7 +88,7 @@ class Nutter(NutterApi):
         return tests
 
     def run_test(self, testpath, cluster_id,
-                 timeout=120, pull_wait_time=DEFAULT_POLL_WAIT_TIME):
+                 timeout=120, pull_wait_time=DEFAULT_POLL_WAIT_TIME, notebook_params=None):
         self._add_status_event(NutterStatusEvents.TestExecutionRequest, testpath)
         test_notebook = TestNotebook.from_path(testpath)
         if test_notebook is None:
@@ -96,13 +96,13 @@ class Nutter(NutterApi):
 
         result = self.dbclient.execute_notebook(
             test_notebook.path, cluster_id,
-            timeout=timeout, pull_wait_time=pull_wait_time)
+            timeout=timeout, pull_wait_time=pull_wait_time, notebook_params=notebook_params)
 
         return result
 
     def run_tests(self, pattern, cluster_id,
                   timeout=120, max_parallel_tests=1, recursive=False,
-                  poll_wait_time=DEFAULT_POLL_WAIT_TIME):
+                  poll_wait_time=DEFAULT_POLL_WAIT_TIME, notebook_params=None):
 
         self._add_status_event(NutterStatusEvents.TestExecutionRequest, pattern)
         root, pattern_to_match = self._get_root_and_pattern(pattern)
@@ -119,7 +119,7 @@ class Nutter(NutterApi):
             NutterStatusEvents.TestsListingFiltered, len(filtered_notebooks))
 
         return self._schedule_and_run(
-            filtered_notebooks, cluster_id, max_parallel_tests, timeout, poll_wait_time)
+            filtered_notebooks, cluster_id, max_parallel_tests, timeout, poll_wait_time, notebook_params)
 
     def events_processor_wait(self):
         if self._events_processor is None:
@@ -168,7 +168,7 @@ class Nutter(NutterApi):
         return root, valid_pattern
 
     def _schedule_and_run(self, test_notebooks, cluster_id,
-                          max_parallel_tests, timeout, pull_wait_time):
+                          max_parallel_tests, timeout, pull_wait_time, notebook_params=None):
         func_scheduler = scheduler.get_scheduler(max_parallel_tests)
         for test_notebook in test_notebooks:
             self._add_status_event(
@@ -176,12 +176,12 @@ class Nutter(NutterApi):
             logging.debug(
                 'Scheduling execution of: {}'.format(test_notebook.path))
             func_scheduler.add_function(self._execute_notebook,
-                                        test_notebook.path, cluster_id, timeout, pull_wait_time)
+                                        test_notebook.path, cluster_id, timeout, pull_wait_time, notebook_params)
         return self._run_and_await(func_scheduler)
 
-    def _execute_notebook(self, test_notebook_path, cluster_id, timeout, pull_wait_time):
+    def _execute_notebook(self, test_notebook_path, cluster_id, timeout, pull_wait_time, notebook_params=None):
         result = self.dbclient.execute_notebook(test_notebook_path,
-                                                cluster_id, None, timeout, pull_wait_time)
+                                                cluster_id, timeout, pull_wait_time, notebook_params)
         self._add_status_event(NutterStatusEvents.TestExecuted,
                                ExecutionResultEventData.from_execution_results(result))
         logging.debug('Executed: {}'.format(test_notebook_path))

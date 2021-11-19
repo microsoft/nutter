@@ -56,9 +56,9 @@ class DatabricksAPIClient(object):
 
         return workspace_path_obj
 
-    def execute_notebook(self, notebook_path, cluster_id,
-                         notebook_params=None, timeout=120,
-                         pull_wait_time=DEFAULT_POLL_WAIT_TIME):
+    def execute_notebook(self, notebook_path, cluster_id, timeout=120,
+                         pull_wait_time=DEFAULT_POLL_WAIT_TIME,
+                         notebook_params=None):
         if not notebook_path:
             raise ValueError("empty path")
         if not cluster_id:
@@ -68,7 +68,7 @@ class DatabricksAPIClient(object):
                 "Timeout must be greater than {}".format(self.min_timeout))
         if notebook_params is not None:
             if not isinstance(notebook_params, dict):
-                raise ValueError("Parameters must be a dictionary")
+                raise ValueError("Parameters must be in the form of a dictionary (See #run-single-test-notebook section in README)")
         if pull_wait_time <= 1:
             pull_wait_time = DEFAULT_POLL_WAIT_TIME
 
