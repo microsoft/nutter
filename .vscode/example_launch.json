@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+    {
+    "name": "Python: Current File",
+    "type": "python",
+    "request": "launch",
+    "console": "integratedTerminal",
+    "python": "python3",
+    "module": "cli.nuttercli",
+    "args": [
+        "run",
+        "<Add test pattern here>",
+        "--cluster_id",
+        "<Add cluster_id here>",
+        "--notebook_params",
+        "{\"example_key_1\": \"example_value_1\", \"example_key_2\": \"example_value_2\"}"
+        ]
+    }]
+}
