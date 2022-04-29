@@ -108,7 +108,7 @@ test_name (19.43149897100011 seconds)
 
 ### Test Cases
 
-A test fixture can contain 1 or mote test cases.  Test cases are discovered when execute_tests() is called on the test fixture.  Every test case is comprised of 1 required and 3 optional methods and are discovered by the following convention: prefix_testname, where valid prefixes are: before_, run_, assertion_, and after_.  A test fixture that has run_fred and assertion_fred methods has 1 test case called 'fred'.  The following are details about test case methods:  
+A test fixture can contain 1 or more test cases.  Test cases are discovered when execute_tests() is called on the test fixture.  Every test case is comprised of 1 required and 3 optional methods and are discovered by the following convention: prefix_testname, where valid prefixes are: before_, run_, assertion_, and after_.  A test fixture that has run_fred and assertion_fred methods has 1 test case called 'fred'.  The following are details about test case methods:  
 
 * _before\_(testname)_ - (optional) - if provided, is run prior to the 'run_' method.  This method can be used to setup any test pre-conditions
 
