@@ -17,7 +17,7 @@ from .resultsvalidator import ExecutionResultsValidator
 from .reportsman import ReportWriters
 from . import reportsman as reports
 
-__version__ = '0.1.34'
+__version__ = '0.1.35'
 
 BUILD_NUMBER_ENV_VAR = 'NUTTER_BUILD_NUMBER'
 
