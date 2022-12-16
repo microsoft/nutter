@@ -222,7 +222,7 @@ class TestCaseResultView(ResultsView):
     def get_view(self):
         sw = StringWriter()
 
-        time = '{} seconds'.format(self.execution_time)
+        time = '{:.3f} seconds'.format(self.execution_time)
         sw.write_line('{} ({})'.format(self.test_case, time))
 
         if (self.passed):

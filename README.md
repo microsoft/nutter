@@ -101,7 +101,7 @@ Notebook: (local) - Lifecycle State: N/A, Result: N/A
 ============================================================
 PASSING TESTS
 ------------------------------------------------------------
-test_name (19.43149897100011 seconds)
+test_name (19.431 seconds)
 
 
 ============================================================
@@ -246,8 +246,8 @@ Run Page URL: N/A
 ============================================================
 PASSING TESTS
 ------------------------------------------------------------
-country_data_is_inserted (11.446587234000617 seconds)
-customer_data_is_inserted (11.53276599000128 seconds)
+country_data_is_inserted (11.447 seconds)
+customer_data_is_inserted (11.533 seconds)
 
 
 ============================================================
