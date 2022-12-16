@@ -8,7 +8,7 @@
   * [Nutter Fixture](#nutter-fixture)
   * [Test Cases](#test-cases)
   * [*before_all* and *after_all*](#before-all-and-after-all)
-  * [Running test fixtures in parallel](#Running-test-fixtures-in-parallel)
+  * [Running test fixtures in parallel](#running-test-fixtures-in-parallel)
 - [Nutter CLI](#nutter-cli)
   * [Getting Started with the Nutter CLI](#getting-started-with-the-nutter-cli)
   * [Listing test Notebooks](#listing-test-notebooks)
