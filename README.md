@@ -7,11 +7,12 @@
   * [Cluster Installation](#cluster-installation)
   * [Nutter Fixture](#nutter-fixture)
   * [Test Cases](#test-cases)
-  * [before_all and after_all](#before-all-and-after-all)
+  * [*before_all* and *after_all*](#before-all-and-after-all)
+  * [Running test fixtures in parallel](#running-test-fixtures-in-parallel)
 - [Nutter CLI](#nutter-cli)
   * [Getting Started with the Nutter CLI](#getting-started-with-the-nutter-cli)
-  * [Listing Test Notebooks](#listing-test-notebooks)
-  * [Executing Test Notebooks](#executing-test-notebooks)
+  * [Listing test Notebooks](#listing-test-notebooks)
+  * [Executing test Notebooks](#executing-test-notebooks)
   * [Run single test notebook](#run-single-test-notebook)
   * [Run multiple tests notebooks](#run-multiple-tests-notebooks)
   * [Parallel Execution](#parallel-execution)
@@ -198,6 +199,64 @@ class TestFixture(NutterFixture):
     NutterFixture.__init__(self)
 ```
 
+### Running test fixtures in parallel
+
+
+Version 0.1.35 includes a parallel runner class ```NutterFixtureParallelRunner```  that facilitates the execution of test fixtures concurrently. This approach could significantly increase the performance of your testing pipeline.
+
+The following code executes two fixtures, ```CustomerTestFixture``` and  ```CountryTestFixture``` in parallel.
+
+```Python
+from runtime.runner import NutterFixtureParallelRunner
+from runtime.nutterfixture import NutterFixture, tag
+class CustomerTestFixture(NutterFixture):
+   def run_customer_data_is_inserted(self):
+      dbutils.notebook.run('../data/customer_data_import', 600)
+
+   def assertion_customer_data_is_inserted(self):
+      some_tbl = sqlContext.sql('SELECT COUNT(*) AS total FROM customers')
+      first_row = some_tbl.first()
+      assert (first_row[0] == 1)
+
+class CountryTestFixture(NutterFixture):
+   def run_country_data_is_inserted(self):
+      dbutils.notebook.run('../data/country_data_import', 600)
+
+   def assertion_country_data_is_inserted(self):
+      some_tbl = sqlContext.sql('SELECT COUNT(*) AS total FROM countries')
+      first_row = some_tbl.first()
+      assert (first_row[0] == 1)
+
+parallel_runner = NutterFixtureParallelRunner(num_of_workers=2)
+parallel_runner.add_test_fixture(CustomerTestFixture())
+parallel_runner.add_test_fixture(CountryTestFixture())
+
+result = parallel_runner.execute()
+print(result.to_string())
+# Comment out the next line (result.exit(dbutils)) to see the test result report from within the notebook
+# result.exit(dbutils)
+
+```
+
+The parallel runner combines the test results of both fixtures in a single result.
+
+``` bash
+Notebook: N/A - Lifecycle State: N/A, Result: N/A
+Run Page URL: N/A
+============================================================
+PASSING TESTS
+------------------------------------------------------------
+country_data_is_inserted (11.446587234000617 seconds)
+customer_data_is_inserted (11.53276599000128 seconds)
+
+
+============================================================
+
+Command took 11.67 seconds -- by foo@bar.com at 12/15/2022, 9:34:24 PM on Foo Cluster
+```
+
+
+
 ## Nutter CLI
 
 The Nutter CLI is a command line interface that allows you to execute and list tests via a Command Prompt.
@@ -230,7 +289,7 @@ $env:DATABRICKS_TOKEN="TOKEN"
 
 __Note:__ For more information about personal access tokens review  [Databricks API Authentication](https://docs.azuredatabricks.net/dev-tools/api/latest/authentication.html).
 
-### Listing Test Notebooks
+### Listing test notebooks
 
 The following command list all test notebooks in the folder ```/dataload```
 
@@ -248,16 +307,16 @@ You can list all test notebooks in the folder structure using the ```--recursive
 nutter list /dataload --recursive
 ```
 
-### Executing Test Notebooks
+### Executing test notebooks
 
 The ```run``` command  schedules the execution of test notebooks and waits for their result.
 
 ### Run single test notebook
 
-The following command executes the test notebook ```/dataload/test_sourceLoad``` in the cluster ```0123-12334-tonedabc```.
+The following command executes the test notebook ```/dataload/test_sourceLoad``` in the cluster ```0123-12334-tonedabc``` with the notebook_param key-value pairs of ```{"example_key_1": "example_value_1", "example_key_2": "example_value_2"}``` (Please note the escaping of quotes):
 
 ```bash
-nutter run dataload/test_sourceLoad --cluster_id 0123-12334-tonedabc
+nutter run dataload/test_sourceLoad --cluster_id 0123-12334-tonedabc --notebook_params "{\"example_key_1\": \"example_value_1\", \"example_key_2\": \"example_value_2\"}"
 ```
 
 __Note:__ In Azure Databricks you can get the cluster ID by selecting a cluster name from the Clusters tab and clicking on the JSON view.
@@ -267,10 +326,10 @@ __Note:__ In Azure Databricks you can get the cluster ID by selecting a cluster 
 The Nutter CLI supports the execution of multiple notebooks via name pattern matching. The Nutter CLI applies the pattern to the name of test notebook **without** the *test_* prefix. The CLI also expects that you omit the prefix when specifying the pattern.
 
 
-Say the *dataload* folder has the following test notebooks: *test_srcLoad* and *test_srcValidation*. The following command will result in the execution of both tests.
+Say the *dataload* folder has the following test notebooks: *test_srcLoad* and *test_srcValidation* with the notebook_param key-value pairs of ```{"example_key_1": "example_value_1", "example_key_2": "example_value_2"}```. The following command will result in the execution of both tests.
 
 ```bash
-nutter run dataload/src* --cluster_id 0123-12334-tonedabc
+nutter run dataload/src* --cluster_id 0123-12334-tonedabc --notebook_params "{\"example_key_1\": \"example_value_1\", \"example_key_2\": \"example_value_2\"}" 
 ```
 
 In addition, if you have tests in a hierarchical folder structure, you can recursively execute all tests by setting the ```--recursive``` flag.
@@ -316,6 +375,10 @@ FLAGS
     --max_parallel_tests   Sets the level of parallelism for test notebook execution.
     --recursive            Executes all tests in the hierarchical folder structure. 
     --poll_wait_time       Polling interval duration for notebook status. Default is 5 (5 seconds).
+    --notebook_params      Allows parameters to be passed from the CLI tool to the test notebook. From the 
+                           notebook, these parameters can then be accessed by the notebook using 
+                           the 'dbutils.widgets.get('key')' syntax.
+
 ```
 
 __Note:__ You can also use flags syntax for POSITIONAL ARGUMENTS
@@ -434,6 +497,9 @@ steps:
     testRunTitle: 'Publish Nutter results'
   condition: succeededOrFailed()
 ```
+
+### Debugging Locally
+If using Visual Studio Code, you can use the `example_launch.json` file provided, editing the variables in the `<>` symbols to match your environment. You should be able to use the debugger to see the test run results, much the same as you would in Azure Devops.
 
 ## Contributing
 

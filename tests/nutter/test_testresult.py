@@ -3,11 +3,15 @@ Copyright (c) Microsoft Corporation.
 Licensed under the MIT license.
 """
 
-import pytest
-import json
-from common.testresult import TestResults, TestResult
-import pickle
 import base64
+import json
+import pickle
+
+import mock
+import pytest
+from common.testresult import TestResult, TestResults
+from py4j.protocol import Py4JError, Py4JJavaError
+
 
 def test__testresults_append__type_not_testresult__throws_error():
     # Arrange
@@ -74,6 +78,21 @@ def test__deserialize__invalid_pickle_data__throws_Exception():
     with pytest.raises(Exception):
         test_results.deserialize(invalid_pickle)
 
+def test__deserialize__p4jjavaerror__is_serializable_and_deserializable():
+    # Arrange
+    test_results = TestResults()
+
+    py4j_exception = get_mock_py4j_error_exception(get_mock_gateway_client(), mock_target_id="o123")
+
+    test_results.append(TestResult("Test Name", True, 1, [], py4j_exception))
+
+    with mock.patch('py4j.protocol.get_return_value') as mock_get_return_value:
+        mock_get_return_value.return_value = 'foo'
+        serialized_data = test_results.serialize()
+        deserialized_data = TestResults().deserialize(serialized_data)
+
+    assert test_results == deserialized_data
+
 
 def test__eq__test_results_equal_but_not_same_ref__are_equal():
     # Arrange
@@ -139,3 +158,25 @@ def test__deserialize__data_is_base64_str__can_deserialize():
     test_results_from_data = TestResults().deserialize(serialized_str)
 
     assert test_results == test_results_from_data
+
+
+def get_mock_gateway_client():
+    mock_client = mock.Mock()
+    mock_client.send_command.return_value = "0"
+    mock_client.converters = []
+    mock_client.is_connected.return_value = True
+    mock_client.deque = mock.Mock()
+    return mock_client
+
+
+def get_mock_java_object(mock_client, mock_target_id):
+    mock_java_object = mock.Mock()
+    mock_java_object._target_id = mock_target_id
+    mock_java_object._gateway_client = mock_client
+    return mock_java_object
+
+
+def get_mock_py4j_error_exception(mock_client, mock_target_id):
+    mock_java_object = get_mock_java_object(mock_client, mock_target_id)
+    mock_errmsg = "An error occurred while calling {}.load.".format(mock_target_id)
+    return Py4JJavaError(mock_errmsg, java_exception=mock_java_object)
