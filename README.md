@@ -7,11 +7,12 @@
   * [Cluster Installation](#cluster-installation)
   * [Nutter Fixture](#nutter-fixture)
   * [Test Cases](#test-cases)
-  * [before_all and after_all](#before-all-and-after-all)
+  * [*before_all* and *after_all*](#before-all-and-after-all)
+  * [Running test fixtures in parallel](#Running-test-fixtures-in-parallel)
 - [Nutter CLI](#nutter-cli)
   * [Getting Started with the Nutter CLI](#getting-started-with-the-nutter-cli)
-  * [Listing Test Notebooks](#listing-test-notebooks)
-  * [Executing Test Notebooks](#executing-test-notebooks)
+  * [Listing test Notebooks](#listing-test-notebooks)
+  * [Executing test Notebooks](#executing-test-notebooks)
   * [Run single test notebook](#run-single-test-notebook)
   * [Run multiple tests notebooks](#run-multiple-tests-notebooks)
   * [Parallel Execution](#parallel-execution)
@@ -198,6 +199,64 @@ class TestFixture(NutterFixture):
     NutterFixture.__init__(self)
 ```
 
+### Running test fixtures in parallel
+
+
+Version 0.1.35 includes a parallel runner class ```NutterFixtureParallelRunner```  that facilitates the execution of test fixtures concurrently. This approach could significantly increase the performance of your testing pipeline.
+
+The following code executes two fixtures, ```CustomerTestFixture``` and  ```CountryTestFixture``` in parallel.
+
+```Python
+from runtime.runner import NutterFixtureParallelRunner
+from runtime.nutterfixture import NutterFixture, tag
+class CustomerTestFixture(NutterFixture):
+   def run_customer_data_is_inserted(self):
+      dbutils.notebook.run('../data/customer_data_import', 600)
+
+   def assertion_customer_data_is_inserted(self):
+      some_tbl = sqlContext.sql('SELECT COUNT(*) AS total FROM customers')
+      first_row = some_tbl.first()
+      assert (first_row[0] == 1)
+
+class CountryTestFixture(NutterFixture):
+   def run_country_data_is_inserted(self):
+      dbutils.notebook.run('../data/country_data_import', 600)
+
+   def assertion_country_data_is_inserted(self):
+      some_tbl = sqlContext.sql('SELECT COUNT(*) AS total FROM countries')
+      first_row = some_tbl.first()
+      assert (first_row[0] == 1)
+
+parallel_runner = NutterFixtureParallelRunner(num_of_workers=2)
+parallel_runner.add_test_fixture(CustomerTestFixture())
+parallel_runner.add_test_fixture(CountryTestFixture())
+
+result = parallel_runner.execute()
+print(result.to_string())
+# Comment out the next line (result.exit(dbutils)) to see the test result report from within the notebook
+# result.exit(dbutils)
+
+```
+
+The parallel runner combines the test results of both fixtures in a single result.
+
+``` bash
+Notebook: N/A - Lifecycle State: N/A, Result: N/A
+Run Page URL: N/A
+============================================================
+PASSING TESTS
+------------------------------------------------------------
+country_data_is_inserted (11.446587234000617 seconds)
+customer_data_is_inserted (11.53276599000128 seconds)
+
+
+============================================================
+
+Command took 11.67 seconds -- by foo@bar.com at 12/15/2022, 9:34:24 PM on Foo Cluster
+```
+
+
+
 ## Nutter CLI
 
 The Nutter CLI is a command line interface that allows you to execute and list tests via a Command Prompt.
@@ -230,7 +289,7 @@ $env:DATABRICKS_TOKEN="TOKEN"
 
 __Note:__ For more information about personal access tokens review  [Databricks API Authentication](https://docs.azuredatabricks.net/dev-tools/api/latest/authentication.html).
 
-### Listing Test Notebooks
+### Listing test notebooks
 
 The following command list all test notebooks in the folder ```/dataload```
 
@@ -248,7 +307,7 @@ You can list all test notebooks in the folder structure using the ```--recursive
 nutter list /dataload --recursive
 ```
 
-### Executing Test Notebooks
+### Executing test notebooks
 
 The ```run``` command  schedules the execution of test notebooks and waits for their result.
 
