@@ -505,14 +505,6 @@ If using Visual Studio Code, you can use the `example_launch.json` file provided
 
 ### Contribution Tips
 
- - There's a known issue with VS Code and the lastest version of pytest.
-   - Please make sure that you install pytest 5.0.1
-   - If you installed pytest using VS Code, then you are likely using the incorrect version. Run the following command to fix it:
-
-``` Python
-pip install --force-reinstall pytest==5.0.1
- ```
-
 Creating the wheel file and manually test wheel locally
 
 1. Change directory to the root that contains setup.py
