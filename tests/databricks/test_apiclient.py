@@ -60,35 +60,35 @@ def test__execute_notebook__emptypath__valueerrror(mocker):
     db = __get_client(mocker)
 
     with pytest.raises(ValueError):
-        db.execute_notebook('', 'cluster')
+        db.execute_notebook('', 'cluster', None)
 
 
 def test__execute_notebook__nonepath__valueerror(mocker):
     db = __get_client(mocker)
 
     with pytest.raises(ValueError):
-        db.execute_notebook(None, 'cluster')
+        db.execute_notebook(None, 'cluster', None)
 
 
 def test__execute_notebook__emptycluster__valueerror(mocker):
     db = __get_client(mocker)
 
     with pytest.raises(ValueError):
-        db.execute_notebook('/', '')
+        db.execute_notebook('/', '', None)
 
 
 def test__execute_notebook__non_dict_params__valueerror(mocker):
     db = __get_client(mocker)
 
     with pytest.raises(ValueError):
-        db.execute_notebook('/', 'cluster', notebook_params='')
+        db.execute_notebook('/', 'cluster', None, notebook_params='')
 
 
 def test__execute_notebook__nonecluster__valueerror(mocker):
     db = __get_client(mocker)
 
     with pytest.raises(ValueError):
-        db.execute_notebook('/', None)
+        db.execute_notebook('/', None, None)
 
 
 def test__execute_notebook__success__executeresult_has_run_url(mocker):
@@ -99,7 +99,7 @@ def test__execute_notebook__success__executeresult_has_run_url(mocker):
     run_id['run_id'] = 1
     db = __get_client_for_execute_notebook(mocker, output_data, run_id)
 
-    result = db.execute_notebook('/mynotebook', 'clusterid')
+    result = db.execute_notebook('/mynotebook', 'clusterid', None)
 
     assert result.notebook_run_page_url == run_page_url
 
@@ -111,7 +111,7 @@ def test__execute_notebook__failure__executeresult_has_run_url(mocker):
     run_id['run_id'] = 1
     db = __get_client_for_execute_notebook(mocker, output_data, run_id)
 
-    result = db.execute_notebook('/mynotebook', 'clusterid')
+    result = db.execute_notebook('/mynotebook', 'clusterid', None)
 
     assert result.notebook_run_page_url == run_page_url
 
@@ -122,7 +122,7 @@ def test__execute_notebook__terminatestate__success(mocker):
     run_id['run_id'] = 1
     db = __get_client_for_execute_notebook(mocker, output_data, run_id)
 
-    result = db.execute_notebook('/mynotebook', 'clusterid')
+    result = db.execute_notebook('/mynotebook', 'clusterid', None)
 
     assert result.task_result_state == 'TERMINATED'
 
@@ -133,7 +133,7 @@ def test__execute_notebook__skippedstate__resultstate_is_SKIPPED(mocker):
     run_id['run_id'] = 1
     db = __get_client_for_execute_notebook(mocker, output_data, run_id)
 
-    result = db.execute_notebook('/mynotebook', 'clusterid')
+    result = db.execute_notebook('/mynotebook', 'clusterid', None)
 
     assert result.task_result_state == 'SKIPPED'
 
@@ -144,7 +144,7 @@ def test__execute_notebook__internal_error_state__resultstate_is_INTERNAL_ERROR(
     run_id['run_id'] = 1
     db = __get_client_for_execute_notebook(mocker, output_data, run_id)
 
-    result = db.execute_notebook('/mynotebook', 'clusterid')
+    result = db.execute_notebook('/mynotebook', 'clusterid', None)
 
     assert result.task_result_state == 'INTERNAL_ERROR'
 
@@ -157,7 +157,7 @@ def test__execute_notebook__timeout_1_sec_lcs_isrunning__timeoutexception(mocker
 
     with pytest.raises(client.TimeOutException):
         db.min_timeout = 1
-        result = db.execute_notebook('/mynotebook', 'clusterid', timeout=1)
+        result = db.execute_notebook('/mynotebook', 'clusterid', None, timeout=1)
 
 
 def test__execute_notebook__timeout_greater_than_min__valueerror(mocker):
@@ -168,7 +168,7 @@ def test__execute_notebook__timeout_greater_than_min__valueerror(mocker):
 
     with pytest.raises(ValueError):
         db.min_timeout = 10
-        result = db.execute_notebook('/mynotebook', 'clusterid', timeout=1)
+        result = db.execute_notebook('/mynotebook', 'clusterid', None, timeout=1)
 
 
 default_run_page_url = 'https://westus2.azuredatabricks.net/?o=14702dasda6094293890#job/4/run/1'

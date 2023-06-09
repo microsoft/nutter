@@ -56,13 +56,13 @@ class DatabricksAPIClient(object):
 
         return workspace_path_obj
 
-    def execute_notebook(self, notebook_path, cluster_id, timeout=120,
+    def execute_notebook(self, notebook_path, cluster_id, new_cluster_config, timeout=120,
                          pull_wait_time=DEFAULT_POLL_WAIT_TIME,
                          notebook_params=None):
         if not notebook_path:
             raise ValueError("empty path")
-        if not cluster_id:
-            raise ValueError("empty cluster id")
+        if not cluster_id and not new_cluster_config:
+            raise ValueError("Either cluster id or config must be provided")
         if timeout < self.min_timeout:
             raise ValueError(
                 "Timeout must be greater than {}".format(self.min_timeout))
@@ -77,7 +77,7 @@ class DatabricksAPIClient(object):
 
         runid = self._retrier.execute(self.inner_dbclient.jobs.submit_run,
                                       run_name=name,
-                                      existing_cluster_id=cluster_id,
+                                      existing_cluster_id=cluster_id, new_cluster=new_cluster_config,
                                       notebook_task=ntask,
                                       )
 

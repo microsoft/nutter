@@ -206,6 +206,7 @@ class RunCommandResultView(ResultsView):
 
 
 class TestCaseResultView(ResultsView):
+    __test__ = False
     def __init__(self, nutter_test_results):
 
         if not isinstance(nutter_test_results, TestResult):

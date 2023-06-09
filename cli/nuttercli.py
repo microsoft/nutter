@@ -7,6 +7,7 @@ import fire
 import logging
 import os
 import datetime
+import json
 
 import common.api as api
 from common.apiclient import DEFAULT_POLL_WAIT_TIME, InvalidConfigurationException
@@ -50,31 +51,33 @@ class NutterCLI(object):
         self._set_nutter(debug)
         super().__init__()
 
-    def run(self, test_pattern, cluster_id,
+    def run(self, test_pattern, cluster_id=None, new_cluster_config=None,
             timeout=120, junit_report=False,
             tags_report=False, max_parallel_tests=1,
             recursive=False, poll_wait_time=DEFAULT_POLL_WAIT_TIME, notebook_params=None):
         try:
-            logging.debug(""" Running tests. test_pattern: {} cluster_id: {}  notebook_params: {} timeout: {}
+            logging.debug(""" Running tests. test_pattern: {} cluster_id: {} new_cluster_config={}  notebook_params: {} timeout: {}
                                junit_report: {} max_parallel_tests: {}
                                tags_report: {}  recursive:{} """
-                          .format(test_pattern, cluster_id, timeout,
-                                  junit_report, max_parallel_tests,
+                          .format(test_pattern, cluster_id, new_cluster_config,
+                                  timeout, junit_report, max_parallel_tests,
                                   tags_report, recursive, notebook_params))
 
             logging.debug("Executing test(s): {}".format(test_pattern))
 
+            new_cluster_config_dict = json.loads(new_cluster_config) if new_cluster_config is not None else None
+
             if self._is_a_test_pattern(test_pattern):
                 logging.debug('Executing pattern')
                 results = self._nutter.run_tests(
-                    test_pattern, cluster_id, timeout,
+                    test_pattern, cluster_id, new_cluster_config, timeout,
                     max_parallel_tests, recursive, poll_wait_time, notebook_params)
                 self._nutter.events_processor_wait()
                 self._handle_results(results, junit_report, tags_report)
                 return
 
             logging.debug('Executing single test')
-            result = self._nutter.run_test(test_pattern, cluster_id,
+            result = self._nutter.run_test(test_pattern, cluster_id, new_cluster_config_dict,
                                            timeout, poll_wait_time)
 
             self._handle_results([result], junit_report, tags_report)

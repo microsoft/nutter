@@ -386,6 +386,7 @@ class OutOfOrderTestFixture(NutterFixture):
         return self.__method_order
 
 class TestFixtureThatDoesNotCallBaseCtor(NutterFixture):
+    __test__ = False
     def __init__(self):
         pass
 

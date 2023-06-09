@@ -47,6 +47,7 @@ class ExecutionResultsValidator(object):
 
 
 class TestCaseFailureException(Exception):
+    __test__ = False
     def __init__(self, message):
         super().__init__(message)
 

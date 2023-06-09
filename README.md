@@ -354,6 +354,9 @@ nutter run dataload/ --cluster_id 0123-12334-tonedabc --recursive --max_parallel
 
 __Note:__ Running tests notebooks in parallel introduces the risk of data race conditions when two or more tests notebooks modify the same tables or files at the same time. Before increasing the level of parallelism make sure that your tests cases modify only tables or files that are used or referenced within the scope of the test notebook.
 
+### Running using a job cluster
+CLUSTER_ID parameter only allows running tests on a cluster that is already running. It is also possible to create use a job cluster created specifically for these tests. To do that, provide cluster config as _new-cluster-config_ param, e.g. `--new-cluster-config '{ \"custom_tags\":{\"foo\": \"bar\"}, \"data_security_mode\": \"SINGLE_USER\", \"node_type_id\": \"Standard_D4ds_v5\", \"num_workers\": 0, \"policy_id\": \"123123\", \"runtime_engine\": \"STANDARD\", \"spark_version\": \"13.0.x-scala2.12\" }'`. For allowed values see tasks > new_cluster section in [API docs](https://docs.databricks.com/api/workspace/jobs/create).
+
 ## Nutter CLI Syntax and Flags
 
 ### Run Command
@@ -369,6 +372,8 @@ POSITIONAL ARGUMENTS
 
 ```  bash
 FLAGS
+    --cluster-id           ID of existing cluster to run at. Same as passing CLUSTER_ID positional arg.
+    --new_cluster_config   Config for running on job cluster. See for more documentation above.                           
     --timeout              Execution timeout in seconds. Integer value. Default is 120
     --junit_report         Create a JUnit XML report from the test results.
     --tags_report          Create a CSV report from the test results that includes the test cases tags.
@@ -504,14 +509,6 @@ If using Visual Studio Code, you can use the `example_launch.json` file provided
 ## Contributing
 
 ### Contribution Tips
-
- - There's a known issue with VS Code and the lastest version of pytest.
-   - Please make sure that you install pytest 5.0.1
-   - If you installed pytest using VS Code, then you are likely using the incorrect version. Run the following command to fix it:
-
-``` Python
-pip install --force-reinstall pytest==5.0.1
- ```
 
 Creating the wheel file and manually test wheel locally
 

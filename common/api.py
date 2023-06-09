@@ -60,11 +60,11 @@ class NutterApi(object):
         pass
 
     @abstractmethod
-    def run_tests(self, pattern, cluster_id, timeout, max_parallel_tests):
+    def run_tests(self, pattern, cluster_id, new_cluster_config, timeout, max_parallel_tests):
         pass
 
     @abstractmethod
-    def run_test(self, testpath, cluster_id, timeout):
+    def run_test(self, testpath, cluster_id, new_cluster_config, timeout):
         pass
 
 
@@ -87,7 +87,7 @@ class Nutter(NutterApi):
 
         return tests
 
-    def run_test(self, testpath, cluster_id,
+    def run_test(self, testpath, cluster_id, new_cluster_config,
                  timeout=120, pull_wait_time=DEFAULT_POLL_WAIT_TIME, notebook_params=None):
         self._add_status_event(NutterStatusEvents.TestExecutionRequest, testpath)
         test_notebook = TestNotebook.from_path(testpath)
@@ -95,12 +95,12 @@ class Nutter(NutterApi):
             raise InvalidTestException
 
         result = self.dbclient.execute_notebook(
-            test_notebook.path, cluster_id,
+            test_notebook.path, cluster_id, new_cluster_config,
             timeout=timeout, pull_wait_time=pull_wait_time, notebook_params=notebook_params)
 
         return result
 
-    def run_tests(self, pattern, cluster_id,
+    def run_tests(self, pattern, cluster_id, new_cluster_config,
                   timeout=120, max_parallel_tests=1, recursive=False,
                   poll_wait_time=DEFAULT_POLL_WAIT_TIME, notebook_params=None):
 
@@ -119,7 +119,7 @@ class Nutter(NutterApi):
             NutterStatusEvents.TestsListingFiltered, len(filtered_notebooks))
 
         return self._schedule_and_run(
-            filtered_notebooks, cluster_id, max_parallel_tests, timeout, poll_wait_time, notebook_params)
+            filtered_notebooks, cluster_id, new_cluster_config, max_parallel_tests, timeout, poll_wait_time, notebook_params)
 
     def events_processor_wait(self):
         if self._events_processor is None:
@@ -167,7 +167,7 @@ class Nutter(NutterApi):
 
         return root, valid_pattern
 
-    def _schedule_and_run(self, test_notebooks, cluster_id,
+    def _schedule_and_run(self, test_notebooks, cluster_id, new_cluster_config,
                           max_parallel_tests, timeout, pull_wait_time, notebook_params=None):
         func_scheduler = scheduler.get_scheduler(max_parallel_tests)
         for test_notebook in test_notebooks:
@@ -176,12 +176,12 @@ class Nutter(NutterApi):
             logging.debug(
                 'Scheduling execution of: {}'.format(test_notebook.path))
             func_scheduler.add_function(self._execute_notebook,
-                                        test_notebook.path, cluster_id, timeout, pull_wait_time, notebook_params)
+                                        test_notebook.path, cluster_id, new_cluster_config, timeout, pull_wait_time, notebook_params)
         return self._run_and_await(func_scheduler)
 
-    def _execute_notebook(self, test_notebook_path, cluster_id, timeout, pull_wait_time, notebook_params=None):
+    def _execute_notebook(self, test_notebook_path, cluster_id, new_cluster_config, timeout, pull_wait_time, notebook_params=None):
         result = self.dbclient.execute_notebook(test_notebook_path,
-                                                cluster_id, timeout, pull_wait_time, notebook_params)
+                                                cluster_id, new_cluster_config, timeout, pull_wait_time, notebook_params)
         self._add_status_event(NutterStatusEvents.TestExecuted,
                                ExecutionResultEventData.from_execution_results(result))
         logging.debug('Executed: {}'.format(test_notebook_path))
@@ -211,6 +211,7 @@ class Nutter(NutterApi):
 
 
 class TestNotebook(object):
+    __test__ = False
     def __init__(self, name, path):
         if not self._is_valid_test_name(name):
             raise InvalidTestException
@@ -250,6 +251,7 @@ class TestNotebook(object):
 
 
 class TestNamePatternMatcher(object):
+    __test__ = False
     def __init__(self, pattern):
         try:
             # * is an invalid regex in python
