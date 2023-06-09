@@ -17,6 +17,7 @@ def get_testcase(test_name):
 
 
 class TestCase():
+    __test__ = False
     ERROR_MESSAGE_ASSERTION_MISSING = """ TestCase does not contain an assertion function.
                                             Please pass a function to set_assertion """
 

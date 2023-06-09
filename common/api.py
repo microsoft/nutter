@@ -211,6 +211,7 @@ class Nutter(NutterApi):
 
 
 class TestNotebook(object):
+    __test__ = False
     def __init__(self, name, path):
         if not self._is_valid_test_name(name):
             raise InvalidTestException
@@ -250,6 +251,7 @@ class TestNotebook(object):
 
 
 class TestNamePatternMatcher(object):
+    __test__ = False
     def __init__(self, pattern):
         try:
             # * is an invalid regex in python

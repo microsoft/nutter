@@ -556,6 +556,7 @@ def _get_workspacepathobject(objects):
 
 
 class TestEventHandler(EventHandler):
+    __test__ = False
     def __init__(self):
         self._queue = None
         super().__init__()

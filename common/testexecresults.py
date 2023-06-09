@@ -9,6 +9,7 @@ from .testresult import TestResults
 
 
 class TestExecResults():
+    __test__ = False
     def __init__(self, test_results):
         if not isinstance(test_results, TestResults):
             raise TypeError("test_results must be of type TestResults")

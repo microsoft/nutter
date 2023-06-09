@@ -15,6 +15,7 @@ def get_test_results():
     return TestResults()
 
 class TestResults(PickleSerializable):
+    __test__ = False
     def __init__(self):
         self.results = []
         self.test_cases = 0
@@ -70,6 +71,7 @@ class TestResults(PickleSerializable):
         return False
 
 class TestResult:
+    __test__ = False
     def __init__(self, test_name, passed,
                  execution_time, tags, exception=None, stack_trace=""):
 
