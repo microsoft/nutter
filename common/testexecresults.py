@@ -59,7 +59,7 @@ class TestExecResults():
                 autopct=lambda p: '{:.0f}'.format(p * total_testcases / 100).replace('0', ''),
                 shadow=True, colors=["#4CAF50", "red"])
         if legend:
-            plt.legend(title="Test Result", bbox_to_anchor=(0.95, 0.5), bbox_transform=plt.gcf().transFigure,
+            plt.legend(title="Test Result", bbox_to_anchor=(1.1, 0.5), bbox_transform=plt.gcf().transFigure,
                        loc="lower right")
         if title is not None:
             plt.title(title, fontweight='bold')
