@@ -9,6 +9,7 @@ from .testresult import TestResults
 
 import matplotlib.pyplot as plt
 import numpy as np
+import re
 
 
 class TestExecResults():
@@ -56,7 +57,7 @@ class TestExecResults():
 
         plt.figure(figsize=(size, size))
         plt.pie(np.array(pass_fail_count), labels=["Passed", "Failed"],
-                autopct=lambda p: '{:.0f}'.format(p * total_testcases / 100).replace('0', ''),
+                autopct=lambda p: '' if re.search(r'^0+$', string='{:.0f}'.format(p * total_testcases / 100)) else '{:.0f}'.format(p * total_testcases / 100),
                 shadow=True, colors=["#4CAF50", "red"])
         if legend:
             plt.legend(title="Test Result", bbox_to_anchor=(1.1, 0.5), bbox_transform=plt.gcf().transFigure,

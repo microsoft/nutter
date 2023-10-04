@@ -5,3 +5,4 @@ junit_xml
 py4j
 numpy
 matplotlib
+regex
