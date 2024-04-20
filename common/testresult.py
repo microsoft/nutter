@@ -14,6 +14,7 @@ from .pickleserializable import PickleSerializable
 def get_test_results():
     return TestResults()
 
+
 class TestResults(PickleSerializable):
     def __init__(self):
         self.results = []
@@ -27,7 +28,7 @@ class TestResults(PickleSerializable):
 
         self.results.append(testresult)
         self.test_cases = self.test_cases + 1
-        if (not testresult.passed):
+        if not testresult.passed:
             self.num_failures = self.num_failures + 1
 
         total_execution_time = self.total_execution_time + testresult.execution_time
@@ -64,10 +65,19 @@ class TestResults(PickleSerializable):
 
     def __item_in_list_equalto(self, expected_item):
         for item in self.results:
-            if (item == expected_item):
+            if item == expected_item:
                 return True
 
         return False
+
+    def get_counts(self):
+        """
+        This method returns the tuple having frequency of passed and failed test cases.
+        """
+        passed = sum(1 for item in self.results if item.passed)
+        failed = len(self.results) - passed
+        return passed, failed
+
 
 class TestResult:
     def __init__(self, test_name, passed,
