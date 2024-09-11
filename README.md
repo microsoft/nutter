@@ -113,7 +113,7 @@ A test fixture can contain 1 or more test cases.  Test cases are discovered when
 
 * _before\_(testname)_ - (optional) - if provided, is run prior to the 'run_' method.  This method can be used to setup any test pre-conditions
 
-* _run\_(testname)_ - (optional) - if provider, is run after 'before_' if before was provided, otherwise run first.  This method is typically used to run the notebook under test
+* _run\_(testname)_ - (optional) - if provided, is run after 'before_' if before was provided, otherwise run first.  This method is typically used to run the notebook under test
 
 * _assertion\_(testname)_ (required) - run after 'run_', if run was provided.  This method typically contains the test assertions
 
