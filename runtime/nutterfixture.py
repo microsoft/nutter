@@ -20,6 +20,7 @@ def tag(the_tag):
 
         function.tag = the_tag
         return function
+
     return tag_decorator
 
 
@@ -42,9 +43,9 @@ class NutterFixture(object):
             self.before_all()
 
         for key, value in self.__test_case_dict.items():
-            logging.debug('Running test: {}'.format(key))
+            logging.debug(f'Running test: {key}')
             test_result = value.execute_test()
-            logging.debug('Completed running test: {}'.format(key))
+            logging.debug(f'Completed running test: {key}')
             self.test_results.append(test_result)
 
         if len(self.__test_case_dict) > 0 and self.__has_method("after_all"):
@@ -66,9 +67,9 @@ class NutterFixture(object):
             raise InvalidTestFixtureException("Invalid Test Fixture")
         self.__test_case_dict = OrderedDict(sorted(test_case_dict.items(), key=lambda t: t[0]))
 
-        logging.debug("Found {} test cases".format(len(test_case_dict)))
+        logging.debug(f"Found {len(test_case_dict)} test cases")
         for key, value in self.__test_case_dict.items():
-            logging.debug('Test Case: {}'.format(key))
+            logging.debug(f'Test Case: {key}')
 
     def __has_method(self, method_name):
         method = getattr(self, method_name, None)
@@ -80,6 +81,7 @@ class NutterFixture(object):
 class InvalidTestFixtureException(Exception):
     def __init__(self, message):
         super().__init__(message)
+
 
 class InitializationException(Exception):
     def __init__(self, message):

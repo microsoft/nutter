@@ -46,7 +46,8 @@ class FixtureLoader():
 
         return self.__test_case_dictionary
 
-    def __is_test_method(self, attribute):
+    @staticmethod
+    def __is_test_method(attribute):
         if attribute.startswith("before_") or \
                 attribute.startswith("run_") or \
                 attribute.startswith("assertion_") or \
@@ -54,7 +55,8 @@ class FixtureLoader():
             return True
         return False
 
-    def __set_method(self, case, name, func):
+    @staticmethod
+    def __set_method(case, name, func):
         if name.startswith("before_"):
             case.set_before(func)
             return case
@@ -81,7 +83,8 @@ class FixtureLoader():
 
         return name
 
-    def __remove_prefix(self, text, prefix):
+    @staticmethod
+    def __remove_prefix(text, prefix):
         if text.startswith(prefix):
             return text[len(prefix):]
         return text

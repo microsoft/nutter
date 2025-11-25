@@ -44,7 +44,8 @@ class NutterFixtureParallelRunner(object):
 
         return self._collect_results(results)
 
-    def _collect_results(self, results):
+    @staticmethod
+    def _collect_results(results):
         """Collect all results in a single TestExecResults object."""
         all_results = TestResults()
 

@@ -3,15 +3,19 @@ Copyright (c) Microsoft Corporation.
 Licensed under the MIT license.
 """
 
-import json
 import pytest
-from common.resultsview import RunCommandResultsView, TestCaseResultView, ListCommandResultView, ListCommandResultsView
+from unittest.mock import Mock
+from databricks.sdk.service.jobs import Run, RunTask, NotebookTask, RunState, \
+    RunLifeCycleState, RunResultState, RunOutput, NotebookOutput
+
+from common.resultsview import RunCommandResultsView, TestCaseResultView, ListCommandResultView, \
+    ListCommandResultsView
 from common.apiclientresults import ExecuteNotebookResult
 from common.testresult import TestResults, TestResult
 from common.api import TestNotebook
 
-def test__add_exec_result__vaid_instance__isadded(mocker):
 
+def test__add_exec_result__vaid_instance__isadded(mocker):
     test_results = TestResults().serialize()
     notebook_results = __get_ExecuteNotebookResult(
         'SUCCESS', 'TERMINATED', test_results)
@@ -23,7 +27,6 @@ def test__add_exec_result__vaid_instance__isadded(mocker):
 
 
 def test__add_exec_result__vaid_instance_invalid_output__isadded(mocker):
-
     test_results = "NO PICKLE"
     notebook_results = __get_ExecuteNotebookResult(
         'SUCCESS', 'TERMINATED', test_results)
@@ -39,7 +42,6 @@ def test__add_exec_result__vaid_instance_invalid_output__isadded(mocker):
 
 
 def test__add_exec_result__vaid_instance_invalid_output__no_test_case_view(mocker):
-
     test_results = "NO PICKLE"
     notebook_results = __get_ExecuteNotebookResult(
         'SUCCESS', 'TERMINATED', test_results)
@@ -51,7 +53,6 @@ def test__add_exec_result__vaid_instance_invalid_output__no_test_case_view(mocke
 
 
 def test__add_exec_result__vaid_instance__test_case_view(mocker):
-
     test_results = TestResults()
     test_case = TestResult("mycase", True, 10, [])
     test_results.append(test_case)
@@ -76,7 +77,6 @@ def test__add_exec_result__vaid_instance__test_case_view(mocker):
 
 
 def test__add_exec_result__vaid_instance_two_test_cases__two_test_case_view(mocker):
-
     test_results = TestResults()
     test_case = TestResult("mycase", True, 10, [])
     test_results.append(test_case)
@@ -115,11 +115,11 @@ def test__get_view__for_testcase_failed__returns_correct_string(mocker):
     stack_trace = "Stack Trace"
     exception = AssertionError("1 == 2")
     test_case = TestResult("mycase", False, 5.43, [
-                           'tag1', 'tag2'], exception, stack_trace)
+        'tag1', 'tag2'], exception, stack_trace)
     test_case_result_view = TestCaseResultView(test_case)
 
     expected_view = "mycase (5.43 seconds)\n\n" + \
-        stack_trace + "\n\n" + "AssertionError: 1 == 2" + "\n"
+                    stack_trace + "\n\n" + "AssertionError: 1 == 2" + "\n"
 
     # Act
     view = test_case_result_view.get_view()
@@ -128,8 +128,8 @@ def test__get_view__for_testcase_failed__returns_correct_string(mocker):
     assert expected_view == view
 
 
-def test__get_view__for_run_command_result_with_passing_test_case__shows_test_result_under_passing(mocker):
-
+def test__get_view__for_run_command_result_with_passing_test_case__shows_test_result_under_passing(
+        mocker):
     test_results = TestResults()
     test_case = TestResult("mycase", True, 10, [])
     test_results.append(test_case)
@@ -139,7 +139,7 @@ def test__get_view__for_run_command_result_with_passing_test_case__shows_test_re
     notebook_results = __get_ExecuteNotebookResult(
         'SUCCESS', 'TERMINATED', serialized_results)
 
-    #expected_view = 'Name:            \t/test_mynotebook\nNotebook Exec Result:\tTERMINATED \nTests Cases:\nCase:\tmycase\n\n\tPASSED\n\t\n\t\n\tDuration: 10\n\nCase:\tmycase2\n\n\tPASSED\n\t\n\t\n\tDuration: 10\n\n\n----------------------------------------\n'
+    # expected_view = 'Name:            \t/test_mynotebook\nNotebook Exec Result:\tTERMINATED \nTests Cases:\nCase:\tmycase\n\n\tPASSED\n\t\n\t\n\tDuration: 10\n\nCase:\tmycase2\n\n\tPASSED\n\t\n\t\n\tDuration: 10\n\n\n----------------------------------------\n'
     expected_view = '\nNotebook: /test_mynotebook - Lifecycle State: TERMINATED, Result: SUCCESS\n'
     expected_view += 'Run Page URL: {}\n'.format(notebook_results.notebook_run_page_url)
     expected_view += '============================================================\n'
@@ -157,13 +157,14 @@ def test__get_view__for_run_command_result_with_passing_test_case__shows_test_re
     assert expected_view == view
 
 
-def test__get_view__for_run_command_result_with_failing_test_case__shows_test_result_under_failing(mocker):
+def test__get_view__for_run_command_result_with_failing_test_case__shows_test_result_under_failing(
+        mocker):
     test_results = TestResults()
 
     stack_trace = "Stack Trace"
     exception = AssertionError("1 == 2")
     test_case = TestResult("mycase", False, 5.43, [
-                           'tag1', 'tag2'], exception, stack_trace)
+        'tag1', 'tag2'], exception, stack_trace)
     test_case_result_view = TestCaseResultView(test_case)
     test_results.append(test_case)
 
@@ -178,9 +179,9 @@ def test__get_view__for_run_command_result_with_failing_test_case__shows_test_re
     serialized_results = test_results.serialize()
 
     notebook_results = __get_ExecuteNotebookResult(
-        'FAILURE', 'TERMINATED', serialized_results)
+        'FAILED', 'TERMINATED', serialized_results)
 
-    expected_view = '\nNotebook: /test_mynotebook - Lifecycle State: TERMINATED, Result: FAILURE\n'
+    expected_view = '\nNotebook: /test_mynotebook - Lifecycle State: TERMINATED, Result: FAILED\n'
     expected_view += 'Run Page URL: {}\n'.format(notebook_results.notebook_run_page_url)
     expected_view += '============================================================\n'
     expected_view += 'FAILING TESTS\n'
@@ -201,13 +202,13 @@ def test__get_view__for_run_command_result_with_failing_test_case__shows_test_re
 
     assert expected_view == view
 
+
 def test__get_view__for_list_command__with_tests_Found__shows_listing(mocker):
-    test_notebook1 = TestNotebook('test_one','/test_one')
-    test_notebook2 = TestNotebook('test_two','/test_two')
+    test_notebook1 = TestNotebook('test_one', '/test_one')
+    test_notebook2 = TestNotebook('test_two', '/test_two')
     test_notebooks = [test_notebook1, test_notebook2]
     list_result_view1 = ListCommandResultView.from_test_notebook(test_notebook1)
     list_result_view2 = ListCommandResultView.from_test_notebook(test_notebook2)
-
 
     expected_view = '\nTests Found\n'
     expected_view += '-------------------------------------------------------\n'
@@ -222,13 +223,12 @@ def test__get_view__for_list_command__with_tests_Found__shows_listing(mocker):
     assert view == expected_view
 
 
-
-def test__get_view__for_run_command_result_with_one_passing_one_failing__shows_failing_then_passing(mocker):
-
+def test__get_view__for_run_command_result_with_one_passing_one_failing__shows_failing_then_passing(
+        mocker):
     stack_trace = "Stack Trace"
     exception = AssertionError("1 == 2")
     test_case = TestResult("mycase", False, 5.43, [
-                           'tag1', 'tag2'], exception, stack_trace)
+        'tag1', 'tag2'], exception, stack_trace)
     test_case_result_view = TestCaseResultView(test_case)
 
     test_results = TestResults()
@@ -236,9 +236,9 @@ def test__get_view__for_run_command_result_with_one_passing_one_failing__shows_f
     serialized_results = test_results.serialize()
 
     notebook_results = __get_ExecuteNotebookResult(
-        'FAILURE', 'TERMINATED', serialized_results)
+        'FAILED', 'TERMINATED', serialized_results)
 
-    expected_view = '\nNotebook: /test_mynotebook - Lifecycle State: TERMINATED, Result: FAILURE\n'
+    expected_view = '\nNotebook: /test_mynotebook - Lifecycle State: TERMINATED, Result: FAILED\n'
     expected_view += 'Run Page URL: {}\n'.format(notebook_results.notebook_run_page_url)
     expected_view += '============================================================\n'
     expected_view += 'FAILING TESTS\n'
@@ -256,29 +256,36 @@ def test__get_view__for_run_command_result_with_one_passing_one_failing__shows_f
 
 
 def __get_ExecuteNotebookResult(result_state, life_cycle_state, notebook_result):
-    data_json = """
-                {"notebook_output":
-                {"result": "IHaveReturned", "truncated": false},
-                "metadata":
-                {"execution_duration": 15000,
-                "run_type": "SUBMIT_RUN",
-                "cleanup_duration": 0,
-                "number_in_job": 1,
-                "cluster_instance":
-                {"cluster_id": "0925-141d1222-narcs242",
-                "spark_context_id": "803963628344534476"},
-                "creator_user_name": "abc@microsoft.com",
-                "task": {"notebook_task": {"notebook_path": "/test_mynotebook"}},
-                "run_id": 7, "start_time": 1569887259173,
-                "job_id": 4,
-                "state": {"result_state": "SUCCESS", "state_message": "",
-                "life_cycle_state": "TERMINATED"}, "setup_duration": 2000,
-                "run_page_url": "https://westus2.azuredatabricks.net/?o=14702dasda6094293890#job/4/run/1",
-                "cluster_spec": {"existing_cluster_id": "0925-141122-narcs242"}, "run_name": "myrun"}}
-                """
-    data_dict = json.loads(data_json)
-    data_dict['notebook_output']['result'] = notebook_result
-    data_dict['metadata']['state']['result_state'] = result_state
-    data_dict['metadata']['state']['life_cycle_state'] = life_cycle_state
-
-    return ExecuteNotebookResult.from_job_output(data_dict)
+    # Create proper SDK objects instead of JSON
+    result_state_enum = getattr(RunResultState, result_state) if result_state else None
+    lifecycle_state_enum = getattr(RunLifeCycleState, life_cycle_state)
+    
+    run_info = Run(
+        tasks=[
+            RunTask(
+                task_key="test_task",
+                notebook_task=NotebookTask(notebook_path="/test_mynotebook"),
+                run_id=2,
+                state=RunState(
+                    life_cycle_state=lifecycle_state_enum,
+                    result_state=result_state_enum,
+                    state_message=""
+                )
+            )
+        ],
+        run_id=1,
+        run_page_url="https://westus2.azuredatabricks.net/?o=14702dasda6094293890#job/4/run/1",
+        state=RunState(
+            life_cycle_state=lifecycle_state_enum,
+            result_state=result_state_enum,
+            state_message=""
+        ),
+    )
+    
+    # Create mock WorkspaceClient
+    mock_client = Mock()
+    mock_client.jobs.get_run_output.return_value = RunOutput(
+        notebook_output=NotebookOutput(result=notebook_result, truncated=False)
+    )
+    
+    return ExecuteNotebookResult.from_job_output(run_info, mock_client)

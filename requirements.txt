@@ -1,6 +1,5 @@
-databricks-api
-requests
+databricks-sdk
 fire
 junit_xml
 py4j
-
+jsonpickle

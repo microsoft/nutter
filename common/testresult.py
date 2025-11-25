@@ -4,46 +4,58 @@ Licensed under the MIT license.
 """
 
 import base64
-import pickle
+import gzip
+import zlib
+import jsonpickle
 
 from py4j.protocol import Py4JJavaError
 
-from .pickleserializable import PickleSerializable
+from .serializabledata import SerializableData
 
 
 def get_test_results():
     return TestResults()
 
-class TestResults(PickleSerializable):
+
+class TestResults(SerializableData):
+    __test__ = False  # Tell pytest this is not a test class
+    
+    def __str__(self) -> str:
+        return jsonpickle.encode(self)
+
     def __init__(self):
         self.results = []
         self.test_cases = 0
         self.num_failures = 0
         self.total_execution_time = 0
 
-    def append(self, testresult):
-        if not isinstance(testresult, TestResult):
+    def append(self, test_result):
+        if not isinstance(test_result, TestResult):
             raise TypeError("Can only append TestResult to TestResults")
 
-        self.results.append(testresult)
+        self.results.append(test_result)
         self.test_cases = self.test_cases + 1
-        if (not testresult.passed):
+        if not test_result.passed:
             self.num_failures = self.num_failures + 1
 
-        total_execution_time = self.total_execution_time + testresult.execution_time
+        total_execution_time = self.total_execution_time + test_result.execution_time
         self.total_execution_time = total_execution_time
+
+    @staticmethod
+    def serialize_object(obj):
+        bin_data = zlib.compress(bytes(jsonpickle.encode(obj), 'utf-8'))
+        return str(base64.encodebytes(bin_data), "utf-8")
 
     def serialize(self):
         for i in self.results:
             if isinstance(i.exception, Py4JJavaError):
                 i.exception = Exception(str(i.exception))
-        bin_data = pickle.dumps(self)
-        return str(base64.encodebytes(bin_data), "utf-8")
+        return self.serialize_object(self)
 
     def deserialize(self, pickle_string):
         bin_str = pickle_string.encode("utf-8")
         decoded_bin_data = base64.decodebytes(bin_str)
-        return pickle.loads(decoded_bin_data)
+        return jsonpickle.decode(zlib.decompress(decoded_bin_data))
 
     def passed(self):
         for item in self.results:
@@ -64,15 +76,16 @@ class TestResults(PickleSerializable):
 
     def __item_in_list_equalto(self, expected_item):
         for item in self.results:
-            if (item == expected_item):
+            if item == expected_item:
                 return True
 
         return False
 
-class TestResult:
-    def __init__(self, test_name, passed,
-                 execution_time, tags, exception=None, stack_trace=""):
 
+class TestResult:
+    __test__ = False  # Tell pytest this is not a test class
+    
+    def __init__(self, test_name, passed, execution_time, tags, exception=None, stack_trace=""):
         if not isinstance(tags, list):
             raise ValueError("tags must be a list")
         self.passed = passed

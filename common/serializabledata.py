@@ -5,7 +5,8 @@ Licensed under the MIT license.
 
 from abc import abstractmethod, ABCMeta
 
-class PickleSerializable():
+
+class SerializableData:
     __metaclass__ = ABCMeta
 
     @abstractmethod
@@ -13,5 +14,5 @@ class PickleSerializable():
         pass
 
     @abstractmethod
-    def deserialize(self):
+    def deserialize(self, pickle_string):
         pass

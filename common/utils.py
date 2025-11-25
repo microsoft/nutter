@@ -3,23 +3,23 @@ Copyright (c) Microsoft Corporation.
 Licensed under the MIT license.
 """
 
-def recursive_find(dict_instance, keys):
-    if not isinstance(keys, list):
-        raise ValueError("Expected list of keys")
-    if not isinstance(dict_instance, dict):
-        return None
-    if len(keys) == 0:
-        return None
-    key = keys[0]
-    value = dict_instance.get(key, None)
-    if value is None:
-        return None
-    if len(keys) == 1:
-        return value
-    return recursive_find(value, keys[1:len(keys)])
+import os
 
-def contains_test_prefix_or_surfix(name):
+__version__ = '0.2.0'
+
+BUILD_NUMBER_ENV_VAR = 'NUTTER_BUILD_NUMBER'
+
+
+def get_nutter_version():
+    build_number = os.environ.get(BUILD_NUMBER_ENV_VAR)
+    if build_number:
+        return f'{__version__}.{build_number}'
+    return __version__
+
+
+def contains_test_prefix_or_suffix(name):
     if name is None:
         return False
 
-    return name.lower().startswith('test_') or name.lower().endswith('_test')
+    lower_name = name.lower()
+    return lower_name.startswith('test_') or lower_name.endswith('_test')

@@ -6,6 +6,8 @@ Licensed under the MIT license.
 from runtime.nutterfixture import NutterFixture
 
 class TestNutterFixtureBuilder():
+    __test__ = False  # Tell pytest this is not a test class
+    
     def __init__(self):
         self.attributes = {}
         self.class_name = "ImplementingClass"

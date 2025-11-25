@@ -10,13 +10,14 @@ from common.testresult import TestResult
 
 
 def get_testcase(test_name):
-
     tc = TestCase(test_name)
 
     return tc
 
 
 class TestCase():
+    __test__ = False  # Tell pytest this is not a test class
+    
     ERROR_MESSAGE_ASSERTION_MISSING = """ TestCase does not contain an assertion function.
                                             Please pass a function to set_assertion """
 

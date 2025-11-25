@@ -4,21 +4,20 @@ Licensed under the MIT license.
 """
 
 import uuid
-import time
-from databricks_api import DatabricksAPI
-from . import authconfig as cfg, utils
+import datetime
 from .apiclientresults import ExecuteNotebookResult, WorkspacePath
-from .httpretrier import HTTPRetrier
 import logging
+from .utils import get_nutter_version
 
-DEFAULT_POLL_WAIT_TIME = 5
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.jobs import NotebookTask, Task, JobEnvironment
+from databricks.sdk.service.compute import Environment
+
 MIN_TIMEOUT = 10
 
+
 def databricks_client():
-
-    db = DatabricksAPIClient()
-
-    return db
+    return DatabricksAPIClient()
 
 
 class DatabricksAPIClient(object):
@@ -26,20 +25,8 @@ class DatabricksAPIClient(object):
     """
 
     def __init__(self):
-        config = cfg.get_auth_config()
         self.min_timeout = MIN_TIMEOUT
-
-        if config is None:
-            raise InvalidConfigurationException
-
-        # TODO: remove the dependency with this API, an instead use httpclient/requests
-        db = DatabricksAPI(host=config.host,
-                           token=config.token)
-        self.inner_dbclient = db
-
-        # The retrier uses the recommended defaults
-        # https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/jobs
-        self._retrier = HTTPRetrier()
+        self.dbclient = WorkspaceClient(product="nutter", product_version=get_nutter_version())
 
     def list_notebooks(self, path):
         workspace_objects = self.list_objects(path)
@@ -47,95 +34,125 @@ class DatabricksAPIClient(object):
         return notebooks
 
     def list_objects(self, path):
-        objects = self.inner_dbclient.workspace.list(path)
-        logging.debug('Creating WorkspacePath for path {}'.format(path))
-        logging.debug('List response: \n\t{}'.format(objects))
+        objects = self.dbclient.workspace.list(path)
+        logging.debug(f'Creating WorkspacePath for path {path}')
+        logging.debug(f'List response: \n\t{objects}')
 
         workspace_path_obj = WorkspacePath.from_api_response(objects)
         logging.debug('WorkspacePath created')
 
         return workspace_path_obj
 
-    def execute_notebook(self, notebook_path, cluster_id, timeout=120,
-                         pull_wait_time=DEFAULT_POLL_WAIT_TIME,
-                         notebook_params=None):
+    def get_cluster_id_by_name(self, cluster_name):
+        """
+        Get cluster ID by cluster name (case-insensitive).
+        
+        Args:
+            cluster_name: The name of the cluster to find
+            
+        Returns:
+            The cluster ID if found
+            
+        Raises:
+            ValueError: If cluster name is empty, not found, or multiple clusters with the same name exist
+        """
+        if not cluster_name:
+            raise ValueError("empty cluster name")
+        
+        # List all clusters and filter by name (case-insensitive)
+        clusters = list(self.dbclient.clusters.list())
+        cluster_name_lower = cluster_name.lower()
+        matching_clusters = [c for c in clusters if c.cluster_name and c.cluster_name.lower() == cluster_name_lower]
+        
+        if len(matching_clusters) == 0:
+            raise ValueError(f"No cluster found with name '{cluster_name}'")
+        elif len(matching_clusters) > 1:
+            raise ValueError(f"Multiple clusters found with name '{cluster_name}'. Please use cluster_id instead.")
+        
+        return matching_clusters[0].cluster_id
+
+    def execute_notebook(self, notebook_path, cluster_id=None, timeout=120,
+                         notebook_params=None, serverless=None):
+        """
+        Execute a notebook on either a cluster or serverless compute.
+        
+        Args:
+            notebook_path: Path to the notebook to execute
+            cluster_id: Cluster ID to run on (mutually exclusive with serverless)
+            timeout: Execution timeout in seconds (default: 120)
+            notebook_params: Parameters to pass to the notebook (dict)
+            serverless: Serverless environment version as integer (e.g., 1) (mutually exclusive with cluster_id)
+            
+        Raises:
+            ValueError: If validation fails
+        """
         if not notebook_path:
             raise ValueError("empty path")
-        if not cluster_id:
+        
+        # Validate that either cluster_id or serverless is provided, but not both
+        if cluster_id is None and serverless is None:
+            raise ValueError("either cluster_id or serverless must be specified")
+        if cluster_id is not None and serverless is not None:
+            raise ValueError("cannot specify both cluster_id and serverless")
+        
+        # Validate cluster_id is not empty if provided
+        if cluster_id is not None and not cluster_id:
             raise ValueError("empty cluster id")
+        
+        # Validate serverless is an integer if provided
+        if serverless is not None:
+            if not isinstance(serverless, int):
+                raise ValueError("serverless must be an integer")
+            
         if timeout < self.min_timeout:
             raise ValueError(
-                "Timeout must be greater than {}".format(self.min_timeout))
+                f"Timeout must be greater than {self.min_timeout}")
         if notebook_params is not None:
             if not isinstance(notebook_params, dict):
-                raise ValueError("Parameters must be in the form of a dictionary (See #run-single-test-notebook section in README)")
-        if pull_wait_time <= 1:
-            pull_wait_time = DEFAULT_POLL_WAIT_TIME
+                raise ValueError("Parameters must be in the form of a dictionary (See "
+                                 "#run-single-test-notebook section in README)")
 
         name = str(uuid.uuid1())
-        ntask = self.__get_notebook_task(notebook_path, notebook_params)
+        
+        # Configure task based on compute type
+        if serverless is not None:
+            # Use serverless compute with environment
+            # Convert integer to string for environment_version
+            ntask = Task(
+                notebook_task=NotebookTask(notebook_path, base_parameters=notebook_params),
+                environment_key="serverless",
+                task_key="a"
+            )
+            
+            # Define serverless environment
+            environments = [
+                JobEnvironment(
+                    environment_key="serverless",
+                    spec=Environment(environment_version=str(serverless))
+                )
+            ]
+            
+            run = self.dbclient.jobs.submit_and_wait(
+                tasks=[ntask],
+                run_name=name,
+                environments=environments,
+                timeout=datetime.timedelta(seconds=timeout)
+            )
+        else:
+            # Use existing cluster
+            ntask = Task(
+                notebook_task=NotebookTask(notebook_path, base_parameters=notebook_params),
+                existing_cluster_id=cluster_id,
+                task_key="a"
+            )
+            
+            run = self.dbclient.jobs.submit_and_wait(
+                tasks=[ntask],
+                run_name=name,
+                timeout=datetime.timedelta(seconds=timeout)
+            )
 
-        runid = self._retrier.execute(self.inner_dbclient.jobs.submit_run,
-                                      run_name=name,
-                                      existing_cluster_id=cluster_id,
-                                      notebook_task=ntask,
-                                      )
-
-        if 'run_id' not in runid:
-            raise NotebookTaskRunIDMissingException
-
-        life_cycle_state, output = self.__pull_for_output(
-            runid['run_id'], timeout, pull_wait_time)
-
-        return ExecuteNotebookResult.from_job_output(output)
-
-    def __pull_for_output(self, run_id, timeout, pull_wait_time):
-        timedout = time.time() + timeout
-        output = {}
-        while time.time() < timedout:
-            output = self._retrier.execute(
-                self.inner_dbclient.jobs.get_run_output, run_id)
-            logging.debug(output)
-
-            lcs = utils.recursive_find(
-                output, ['metadata', 'state', 'life_cycle_state'])
-
-            # As per:
-            # https://docs.azuredatabricks.net/api/latest/jobs.html#jobsrunlifecyclestate
-            # All these are terminal states
-            if lcs == 'TERMINATED' or lcs == 'SKIPPED' or lcs == 'INTERNAL_ERROR':
-                logging.debug('Terminal state returned. {}'.format(lcs))
-                return lcs, output
-            logging.debug('Not terminal state returned. Sleeping {}s'.format(pull_wait_time))
-            time.sleep(pull_wait_time)
-
-        self._raise_timeout(output)
-
-    def _raise_timeout(self, output):
-        run_page_url = utils.recursive_find(
-            output, ['metadata', 'run_page_url'])
-        raise TimeOutException(
-            """ Timeout while waiting for the result of a test.\n
-                Check the status of the execution\n
-                Run page URL: {} """.format(run_page_url))
-
-    def __get_notebook_task(self, path, params):
-        ntask = {}
-        ntask['notebook_path'] = path
-        base_params = []
-        if params is not None:
-            for key in params:
-                param = {}
-                param['key'] = key
-                param['value'] = params[key]
-                base_params.append(param)
-            ntask['base_parameters'] = base_params
-
-        return ntask
-
-
-class NotebookTaskRunIDMissingException(Exception):
-    pass
+        return ExecuteNotebookResult.from_job_output(run, self.dbclient)
 
 
 class InvalidConfigurationException(Exception):

@@ -14,7 +14,7 @@ import logging
 class StatusEventsHandler(object):
     def __init__(self, handler):
         self._event_queue = Queue()
-        self._processor = Processor(handler, self._event_queue,)
+        self._processor = Processor(handler, self._event_queue, )
 
         self._processor.daemon = True
         self._processor.start()
@@ -25,6 +25,7 @@ class StatusEventsHandler(object):
     def wait(self):
         self._event_queue.join()
 
+
 class StatusEvent(object):
     def __init__(self, event, data):
         if not isinstance(event, Enum):
@@ -34,11 +35,13 @@ class StatusEvent(object):
         self.event = event
         self.data = data
 
+
 class EventHandler(ABC):
 
     @abstractmethod
     def handle(self, queue):
         pass
+
 
 class Processor(Thread):
     def __init__(self, handler, event_queue):

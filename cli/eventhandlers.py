@@ -26,8 +26,7 @@ class ConsoleEventHandler(EventHandler):
         try:
             event_instance = event_queue.get()
             if self._debug:
-                logging.debug(
-                    'Message from queue: {}'.format(event_instance))
+                logging.debug(f'Message from queue: {event_instance}')
                 return
             output = self._get_output(event_instance)
             self._print_output(output)
@@ -44,7 +43,7 @@ class ConsoleEventHandler(EventHandler):
         event_output = self._get_event_ouput(event_instance)
         if event_output is None:
             return
-        return '--> {}\n'.format(event_output)
+        return f'--> {event_output}\n'
 
     def _get_event_ouput(self, event_instance):
         if event_instance.event is NutterStatusEvents.TestsListing:
@@ -64,33 +63,30 @@ class ConsoleEventHandler(EventHandler):
         return ''
 
     def _handle_testlisting(self, event):
-        return 'Looking for tests in {}'.format(event.data)
+        return f'Looking for tests in {event.data}'
 
     def _handle_testlistingfiltered(self, event):
         self._filtered_tests = event.data
-        return '{} tests matched the pattern'.format(self._filtered_tests)
+        return f'{self._filtered_tests} tests matched the pattern'
 
     def _handle_testlistingresults(self, event):
-        return '{} tests found'.format(event.data)
+        return f'{event.data} tests found'
 
     def _handle_testsexecuted(self, event):
-        return '{} Success:{} {}'.format(event.data.notebook_path,
-                                         event.data.success,
-                                         event.data.notebook_run_page_url)
+        return f'{event.data.notebook_path} Success:{event.data.success} {event.data.notebook_run_page_url}'
 
     def _handle_testsexecutionrequest(self, event):
-        return 'Execution request: {}'.format(event.data)
+        return f'Execution request: {event.data}'
 
     def _handle_testscheduling(self, event):
         num_of_tests = self._num_of_test_to_execute()
         self._scheduled_tests += 1
-        return '{} of {} tests scheduled for execution'.format(self._scheduled_tests,
-                                                               num_of_tests)
+        return f'{self._scheduled_tests} of {num_of_tests} tests scheduled for execution'
 
     def _handle_testsexecutionresult(self, event):
         num_of_tests = self._num_of_test_to_execute()
         self._done_tests += 1
-        return '{} of {} tests executed'.format(self._done_tests, num_of_tests)
+        return f'{self._done_tests} of {num_of_tests} tests executed'
 
     def _num_of_test_to_execute(self):
         if self._filtered_tests > 0:

@@ -4,7 +4,6 @@ Licensed under the MIT license.
 """
 
 from abc import abstractmethod, ABCMeta
-from common.apiclient import DEFAULT_POLL_WAIT_TIME
 from . import utils
 from .testresult import TestResults
 from . import scheduler
@@ -14,7 +13,7 @@ from .statuseventhandler import StatusEventsHandler
 
 import enum
 import logging
-
+import os
 import re
 import importlib
 
@@ -37,15 +36,13 @@ def get_report_writer(writer):
     return instance
 
 
-def to_testresults(exit_output):
+def to_test_results(exit_output):
     if not exit_output:
         return None
     try:
         return TestResults().deserialize(exit_output)
     except Exception as ex:
-        error = 'error while creating result from {}. Error: {}'.format(
-            ex, exit_output)
-        logging.debug(error)
+        logging.debug(f'error while creating result from {ex}. Error: {exit_output}')
         return None
 
 
@@ -87,22 +84,21 @@ class Nutter(NutterApi):
 
         return tests
 
-    def run_test(self, testpath, cluster_id,
-                 timeout=120, pull_wait_time=DEFAULT_POLL_WAIT_TIME, notebook_params=None):
+    def run_test(self, testpath, cluster_id=None,
+                 timeout=120, notebook_params=None, serverless=None):
         self._add_status_event(NutterStatusEvents.TestExecutionRequest, testpath)
         test_notebook = TestNotebook.from_path(testpath)
         if test_notebook is None:
             raise InvalidTestException
 
         result = self.dbclient.execute_notebook(
-            test_notebook.path, cluster_id,
-            timeout=timeout, pull_wait_time=pull_wait_time, notebook_params=notebook_params)
+            test_notebook.path, cluster_id=cluster_id,
+            timeout=timeout, notebook_params=notebook_params, serverless=serverless)
 
         return result
 
-    def run_tests(self, pattern, cluster_id,
-                  timeout=120, max_parallel_tests=1, recursive=False,
-                  poll_wait_time=DEFAULT_POLL_WAIT_TIME, notebook_params=None):
+    def run_tests(self, pattern, cluster_id=None,
+                  timeout=120, max_parallel_tests=1, recursive=False, notebook_params=None, serverless=None):
 
         self._add_status_event(NutterStatusEvents.TestExecutionRequest, pattern)
         root, pattern_to_match = self._get_root_and_pattern(pattern)
@@ -119,7 +115,7 @@ class Nutter(NutterApi):
             NutterStatusEvents.TestsListingFiltered, len(filtered_notebooks))
 
         return self._schedule_and_run(
-            filtered_notebooks, cluster_id, max_parallel_tests, timeout, poll_wait_time, notebook_params)
+            filtered_notebooks, cluster_id, max_parallel_tests, timeout, notebook_params, serverless)
 
     def events_processor_wait(self):
         if self._events_processor is None:
@@ -140,7 +136,8 @@ class Nutter(NutterApi):
             for test in self._list_tests(directory.path, True):
                 yield test
 
-    def _get_status_events_handler(self, events_handler):
+    @staticmethod
+    def _get_status_events_handler(events_handler):
         if events_handler is None:
             return None
         processor = StatusEventsHandler(events_handler)
@@ -150,11 +147,12 @@ class Nutter(NutterApi):
     def _add_status_event(self, name, status):
         if self._events_processor is None:
             return
-        logging.debug('Status event. name:{} status:{}'.format(name, status))
+        logging.debug(f'Status event. name:{name} status:{status}')
 
         self._events_processor.add_event(name, status)
 
-    def _get_root_and_pattern(self, pattern):
+    @staticmethod
+    def _get_root_and_pattern(pattern):
         segments = pattern.split('/')
         if len(segments) == 0:
             raise ValueError("Invalid pattern. The value must start with /")
@@ -168,7 +166,7 @@ class Nutter(NutterApi):
         return root, valid_pattern
 
     def _schedule_and_run(self, test_notebooks, cluster_id,
-                          max_parallel_tests, timeout, pull_wait_time, notebook_params=None):
+                          max_parallel_tests, timeout, notebook_params=None, serverless=None):
         func_scheduler = scheduler.get_scheduler(max_parallel_tests)
         for test_notebook in test_notebooks:
             self._add_status_event(
@@ -176,15 +174,16 @@ class Nutter(NutterApi):
             logging.debug(
                 'Scheduling execution of: {}'.format(test_notebook.path))
             func_scheduler.add_function(self._execute_notebook,
-                                        test_notebook.path, cluster_id, timeout, pull_wait_time, notebook_params)
+                                        test_notebook.path, cluster_id, timeout, notebook_params, serverless)
         return self._run_and_await(func_scheduler)
 
-    def _execute_notebook(self, test_notebook_path, cluster_id, timeout, pull_wait_time, notebook_params=None):
-        result = self.dbclient.execute_notebook(test_notebook_path,
-                                                cluster_id, timeout, pull_wait_time, notebook_params)
+    def _execute_notebook(self, test_notebook_path, cluster_id, timeout, notebook_params=None, serverless=None):
+        result = self.dbclient.execute_notebook(test_notebook_path, cluster_id=cluster_id,
+                                                timeout=timeout, notebook_params=notebook_params, 
+                                                serverless=serverless)
         self._add_status_event(NutterStatusEvents.TestExecuted,
                                ExecutionResultEventData.from_execution_results(result))
-        logging.debug('Executed: {}'.format(test_notebook_path))
+        logging.debug(f'Executed: {test_notebook_path}')
         return result
 
     def _run_and_await(self, func_scheduler):
@@ -206,11 +205,13 @@ class Nutter(NutterApi):
             func_result.exception is not None))
 
         if func_result.exception is not None:
-            logging.debug('Exception:{}'.format(func_result.exception))
+            logging.debug(f'Exception:{func_result.exception}')
             raise func_result.exception
 
 
 class TestNotebook(object):
+    __test__ = False  # Tell pytest this is not a test class
+    
     def __init__(self, name, path):
         if not self._is_valid_test_name(name):
             raise InvalidTestException
@@ -223,7 +224,8 @@ class TestNotebook(object):
         is_equal = obj.name == self.name and obj.path == self.path
         return isinstance(obj, TestNotebook) and is_equal
 
-    def get_test_name(self, name):
+    @staticmethod
+    def get_test_name(name):
         if name.lower().startswith('test_'):
             return name.split("_")[1]
         if name.lower().endswith('_test'):
@@ -236,20 +238,22 @@ class TestNotebook(object):
             return None
         return cls(name, path)
 
-    @classmethod
-    def _is_valid_test_name(cls, name):
-        return utils.contains_test_prefix_or_surfix(name)
+    @staticmethod
+    def _is_valid_test_name(name):
+        return utils.contains_test_prefix_or_suffix(name)
 
-    @classmethod
-    def _get_notebook_name_from_path(cls, path):
+    @staticmethod
+    def _get_notebook_name_from_path(path):
         segments = path.split('/')
         if len(segments) == 0:
             raise ValueError('Invalid path. Path must start /')
-        name = segments[len(segments)-1]
+        name = segments[-1]
         return name
 
 
 class TestNamePatternMatcher(object):
+    __test__ = False  # Tell pytest this is not a test class
+    
     def __init__(self, pattern):
         try:
             # * is an invalid regex in python
@@ -259,7 +263,7 @@ class TestNamePatternMatcher(object):
                 return
             re.compile(pattern)
         except re.error as ex:
-            logging.debug('Pattern could not be compiled. {}'.format(ex))
+            logging.debug(f'Pattern could not be compiled. {ex}')
             raise ValueError(
                 """ The pattern provided is invalid.
                      The pattern must start with an alphanumeric character """)
@@ -277,6 +281,7 @@ class TestNamePatternMatcher(object):
                 results.append(test_notebook)
         return results
 
+
 class ExecutionResultEventData():
     def __init__(self, notebook_path, success, notebook_run_page_url):
         self.success = success
@@ -287,11 +292,11 @@ class ExecutionResultEventData():
     def from_execution_results(cls, exec_results):
         notebook_run_page_url = exec_results.notebook_run_page_url
         notebook_path = exec_results.notebook_path
+        success = False
         try:
             success = not exec_results.is_any_error
         except Exception as ex:
-            logging.debug("Error while creating the ExecutionResultEventData {}", ex)
-            success = False
+            logging.debug(f"Error while creating the ExecutionResultEventData {ex}")
         finally:
             return cls(notebook_path, success, notebook_run_page_url)
 

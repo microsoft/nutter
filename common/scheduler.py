@@ -8,6 +8,7 @@ import logging
 from threading import Thread
 from queue import Queue
 
+
 def get_scheduler(num_of_workers):
     return Scheduler(num_of_workers)
 
@@ -16,7 +17,7 @@ class Scheduler(object):
     def __init__(self, num_of_workers):
         if num_of_workers < 1 or num_of_workers > 15:
             raise ValueError(
-                'Number of workers is invalid. It must be a value bettwen 1 and 15')
+                'Number of workers is invalid. It must be a value between 1 and 15')
         self._num_of_workers = num_of_workers
         self._in_queue = Queue()
         self._out_queue = Queue()
@@ -108,15 +109,14 @@ class FunctionHandler(Worker):
                 if function_exe is None:
                     logging.debug("Function Handler Stopped")
                     break
-                logging.debug('Function Handler: Execute for {}'.format(function_exe))
+                logging.debug(f'Function Handler: Execute for {function_exe}')
                 result = function_exe.execute()
                 logging.debug('Function Handler: Execute called.')
                 self._out_queue.put(FunctionResult(result, None))
 
             except Exception as ex:
                 self._out_queue.put(FunctionResult(None, ex))
-                logging.debug('Function Handler. Exception in function. Error {} {}'
-                              .format(str(ex), ex is None))
+                logging.debug(f'Function Handler. Exception in function. Error {ex} {ex is None}')
             finally:
                 self._in_queue.task_done()
         self.set_done()

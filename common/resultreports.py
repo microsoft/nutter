@@ -32,11 +32,13 @@ class TestResultsReportWriter(object):
     def write(self):
         pass
 
-    def _validate_add_results(self, notebook_path, test_result):
+    @staticmethod
+    def _validate_add_results(notebook_path, test_result):
         if not isinstance(test_result, TestResults):
             raise ValueError('Expected an instance of TestResults')
         if notebook_path is None or notebook_path == '':
             raise ValueError("Invalid notebook path")
+
 
 class TagsReportRow(object):
     def __init__(self, notebook_name, test_result):
@@ -48,7 +50,8 @@ class TagsReportRow(object):
         self.duration = test_result.execution_time
         self.tags = self._to_tag_string(test_result.tags)
 
-    def _to_tag_string(self, tags):
+    @staticmethod
+    def _to_tag_string(tags):
         logging.debug(tags)
         if tags is None:
             return ''
@@ -62,6 +65,7 @@ class TagsReportRow(object):
                     self.tags, self.notebook_name,
                     self.test_name, self.passed_str, self.duration)
         return str_value
+
 
 class TagsReportWriter(TestResultsReportWriter):
     def __init__(self):
@@ -105,7 +109,8 @@ class JunitXMLReportWriter(TestResultsReportWriter):
         t_suite = self._to_junitxml(notebook_path, test_result)
         self.all_test_suites.append(t_suite)
 
-    def _to_junitxml(self, notebook_path, test_result):
+    @staticmethod
+    def _to_junitxml(notebook_path, test_result):
         tsuite = TestSuite("nutter")
         for t_result in test_result.results:
             fail_error = None

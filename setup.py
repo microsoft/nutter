@@ -1,10 +1,11 @@
 import setuptools
-import cli.nuttercli as nuttercli
+import common.utils as utils
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-version = nuttercli.get_cli_version()
+version = utils.get_nutter_version()
+
 
 def parse_requirements(filename):
     """Load requirements from a pip requirements file."""
@@ -32,5 +33,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.7.0',
+    python_requires='>=3.8.0',
 )

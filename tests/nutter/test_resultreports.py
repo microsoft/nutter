@@ -8,6 +8,7 @@ from common.testresult import TestResults, TestResult
 from common.resultreports import JunitXMLReportWriter
 from common.resultreports import TagsReportWriter
 
+
 def test_junitxmlreportwriter_add_result__invalid_params__raises_valueerror():
     writer = JunitXMLReportWriter()
 

@@ -9,6 +9,8 @@ from .testresult import TestResults, TestResult
 from .stringwriter import StringWriter
 from .api import TestNotebook
 
+RESULTS_SEPARATOR = '-' * 55
+
 
 def get_run_results_views(exec_results):
     if not isinstance(exec_results, list):
@@ -60,12 +62,12 @@ class ListCommandResultsView(ResultsView):
 
     def get_view(self):
         writer = StringWriter()
-        writer.write_line('{}'.format('\nTests Found'))
-        writer.write_line('-' * 55)
+        writer.write_line('\nTests Found')
+        writer.write_line(RESULTS_SEPARATOR)
         for list_result in self.list_results:
             writer.write(list_result.get_view())
 
-        writer.write_line('-' * 55)
+        writer.write_line(RESULTS_SEPARATOR)
 
         return writer.to_string()
 
@@ -87,7 +89,7 @@ class ListCommandResultView(ResultsView):
         return cls(test_notebook.name, test_notebook.path)
 
     def get_view(self):
-        return "Name:\t{}\nPath:\t{}\n\n".format(self.name, self.path)
+        return f"Name:\t{self.name}\nPath:\t{self.path}\n\n"
 
     @property
     def total(self):
@@ -146,16 +148,14 @@ class RunCommandResultView(ResultsView):
 
     def get_view(self):
         sw = StringWriter()
-        sw.write_line("Notebook: {} - Lifecycle State: {}, Result: {}".format(
-            self.notebook_path, self.task_result_state, self.notebook_result_state))
+        sw.write_line(f"Notebook: {self.notebook_path} - Lifecycle State: {self.task_result_state}, Result: {self.notebook_result_state}")
         sw.write_line('Run Page URL: {}'.format(self.notebook_run_page_url))
 
         sw.write_line("=" * 60)
 
         if len(self.test_cases_views) == 0:
             sw.write_line("No test cases were returned.")
-            sw.write_line("Notebook output: {}".format(
-                self.raw_notebook_output))
+            sw.write_line(f"Notebook output: {self.raw_notebook_output}")
             sw.write_line("=" * 60)
             return sw.to_string()
 
@@ -181,15 +181,14 @@ class RunCommandResultView(ResultsView):
 
         return sw.to_string()
 
-    def __to_testresults(self, exit_output):
+    @staticmethod
+    def __to_testresults(exit_output):
         if not exit_output:
             return None
         try:
             return TestResults().deserialize(exit_output)
         except Exception as ex:
-            error = 'error while creating result from {}. Error: {}'.format(
-                ex, exit_output)
-            logging.debug(error)
+            logging.debug('error while creating result from {}. Error: {}', ex, exit_output)
             return None
 
     @property
@@ -206,6 +205,8 @@ class RunCommandResultView(ResultsView):
 
 
 class TestCaseResultView(ResultsView):
+    __test__ = False  # Tell pytest this is not a test class
+    
     def __init__(self, nutter_test_results):
 
         if not isinstance(nutter_test_results, TestResult):
@@ -222,10 +223,9 @@ class TestCaseResultView(ResultsView):
     def get_view(self):
         sw = StringWriter()
 
-        time = '{} seconds'.format(self.execution_time)
-        sw.write_line('{} ({})'.format(self.test_case, time))
+        sw.write_line(f'{self.test_case} ({self.execution_time} seconds)')
 
-        if (self.passed):
+        if self.passed:
             return sw.to_string()
 
         sw.write_line("")

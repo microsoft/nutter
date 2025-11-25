@@ -3,6 +3,7 @@ Copyright (c) Microsoft Corporation.
 Licensed under the MIT license.
 """
 
+
 class StringWriter():
     def __init__(self):
         self.result = ""

@@ -26,8 +26,12 @@ params = [
     (2, 2, {'this': 'this'}),
     (2, 2, ('this', 'that')),
 ]
+
+
 @pytest.mark.parametrize('num_of_funcs, num_of_workers, func_return_value', params)
-def test__run_and_wait__X_functions_X_workers_x_value__results_are_okay(num_of_funcs, num_of_workers, func_return_value):
+def test__run_and_wait__X_functions_X_workers_x_value__results_are_okay(num_of_funcs,
+                                                                        num_of_workers,
+                                                                        func_return_value):
     func_scheduler = scheduler.get_scheduler(num_of_workers)
 
     for i in range(0, num_of_funcs):

@@ -72,7 +72,7 @@ To return the test results to the Nutter CLI:
 result.exit(dbutils)
 ```
 
-__Note:__ The call to result.exit, behind the scenes calls dbutils.notebook.exit, passing the serialized TestResults back to the CLI.  At the current time, print statements do not work when dbutils.notebook.exit is called in a notebook, even if they are written prior to the call.  For this reason, it is required to *temporarily* comment out result.exit(dbutils) when running the tests locally.
+__Note:__ The call to result.exit, behind the scenes calls dbutils.notebook.exit, passing the serialized TestResults back to the CLI.  At the current time, print statements do not work when `dbutils.notebook.exit` is called in a notebook, even if they are written prior to the call.  For this reason, it is required to *temporarily* comment out `result.exit(dbutils)` when running the tests locally.
 
 The following defines a single test fixture named 'MyTestFixture' that has 1 TestCase named 'test_name':
 
@@ -91,10 +91,9 @@ result = MyTestFixture().execute_tests()
 print(result.to_string())
 # Comment out the next line (result.exit(dbutils)) to see the test result report from within the notebook
 result.exit(dbutils)
-
 ```
 
-To execute the test from within the test notebook, simply run the cell containing the above code.  At the current time, in order to see the below test result, you will have to comment out the call to result.exit(dbutils).  That call is required to send the results, if the test is run from the CLI, so do not forget to uncomment after locally testing.
+To execute the test from within the test notebook, simply run the cell containing the above code.  At the current time, in order to see the below test result, you will have to comment out the call to `result.exit(dbutils)`.  That call is required to send the results, if the test is run from the CLI, so do not forget to uncomment after locally testing.
 
 ``` Python
 Notebook: (local) - Lifecycle State: N/A, Result: N/A
@@ -109,7 +108,7 @@ test_name (19.43149897100011 seconds)
 
 ### Test Cases
 
-A test fixture can contain 1 or more test cases.  Test cases are discovered when execute_tests() is called on the test fixture.  Every test case is comprised of 1 required and 3 optional methods and are discovered by the following convention: prefix_testname, where valid prefixes are: before_, run_, assertion_, and after_.  A test fixture that has run_fred and assertion_fred methods has 1 test case called 'fred'.  The following are details about test case methods:  
+A test fixture can contain 1 or more test cases.  Test cases are discovered when execute_tests() is called on the test fixture.  Every test case is comprised of 1 required and 3 optional methods and are discovered by the following convention: prefix_testname, where valid prefixes are: `before_`, `run_`, `assertion_`, and `after_`.  A test fixture that has run_fred and assertion_fred methods has 1 test case called 'fred'.  The following are details about test case methods:
 
 * _before\_(testname)_ - (optional) - if provided, is run prior to the 'run_' method.  This method can be used to setup any test pre-conditions
 
@@ -165,13 +164,13 @@ class MultiTestFixture(NutterFixture):
 
 ### Multiple test assertions pattern with before_all
 
-It is possible to support multiple assertions for a test by implementing a before_all method, no run methods and multiple assertion methods.  In this pattern, the before_all method runs the notebook under test.  There are no run methods.  The assertion methods simply assert against what was done in before_all. 
+It is possible to support multiple assertions for a test by implementing a before_all method, no run methods and multiple assertion methods.  In this pattern, the before_all method runs the notebook under test.  There are no run methods.  The assertion methods simply assert against what was done in before_all.
 
 ``` Python
 from runtime.nutterfixture import NutterFixture, tag
 class MultiTestFixture(NutterFixture):
    def before_all(self):
-     dbutils.notebook.run('notebook_under_test', 600, args) 
+     dbutils.notebook.run('notebook_under_test', 600, args)
       …
 
    def assertion_test_case_1(self):
@@ -271,7 +270,7 @@ pip install nutter
 
 __Note:__ It's recommended to install the Nutter CLI in a virtual environment.
 
-Set the environment variables.
+Set the necessary environment variables.
 
 Linux
 
@@ -287,7 +286,7 @@ $env:DATABRICKS_HOST="HOST"
 $env:DATABRICKS_TOKEN="TOKEN"
 ```
 
-__Note:__ For more information about personal access tokens review  [Databricks API Authentication](https://docs.azuredatabricks.net/dev-tools/api/latest/authentication.html).
+__Note:__ For more information about personal access tokens review  [Databricks Unified Authentication](https://learn.microsoft.com/en-us/azure/databricks/dev-tools/auth/env-vars).
 
 ### Listing test notebooks
 
@@ -299,7 +298,7 @@ nutter list /dataload
 
 __Note:__ The Nutter CLI lists only tests notebooks that follow the naming convention for Nutter test notebooks.
 
-By default the Nutter CLI lists test notebooks in the folder ignoring sub-folders. 
+By default the Nutter CLI lists test notebooks in the folder ignoring sub-folders.
 
 You can list all test notebooks in the folder structure using the ```--recursive```  flag.
 
@@ -319,7 +318,19 @@ The following command executes the test notebook ```/dataload/test_sourceLoad```
 nutter run dataload/test_sourceLoad --cluster_id 0123-12334-tonedabc --notebook_params "{\"example_key_1\": \"example_value_1\", \"example_key_2\": \"example_value_2\"}"
 ```
 
-__Note:__ In Azure Databricks you can get the cluster ID by selecting a cluster name from the Clusters tab and clicking on the JSON view.
+Alternatively, you can specify the cluster by name instead of ID:
+
+```bash
+nutter run dataload/test_sourceLoad --cluster_name "My Test Cluster" --notebook_params "{\"example_key_1\": \"example_value_1\", \"example_key_2\": \"example_value_2\"}"
+```
+
+Or run tests on serverless compute without needing a cluster:
+
+```bash
+nutter run dataload/test_sourceLoad --serverless 1 --notebook_params "{\"example_key_1\": \"example_value_1\", \"example_key_2\": \"example_value_2\"}"
+```
+
+__Note:__ In Azure Databricks you can get the cluster ID by selecting a cluster name from the Clusters tab and clicking on the JSON view. When using `--cluster_name`, Nutter will automatically resolve the name to the cluster ID. When using `--serverless`, specify the environment version as an integer (e.g., 1) and tests will run on Databricks serverless compute.
 
 ### Run multiple tests notebooks
 
@@ -329,7 +340,7 @@ The Nutter CLI supports the execution of multiple notebooks via name pattern mat
 Say the *dataload* folder has the following test notebooks: *test_srcLoad* and *test_srcValidation* with the notebook_param key-value pairs of ```{"example_key_1": "example_value_1", "example_key_2": "example_value_2"}```. The following command will result in the execution of both tests.
 
 ```bash
-nutter run dataload/src* --cluster_id 0123-12334-tonedabc --notebook_params "{\"example_key_1\": \"example_value_1\", \"example_key_2\": \"example_value_2\"}" 
+nutter run dataload/src* --cluster_id 0123-12334-tonedabc --notebook_params "{\"example_key_1\": \"example_value_1\", \"example_key_2\": \"example_value_2\"}"
 ```
 
 In addition, if you have tests in a hierarchical folder structure, you can recursively execute all tests by setting the ```--recursive``` flag.
@@ -338,6 +349,12 @@ The following command will execute all tests in the folder structure within the 
 
 ```bash
 nutter run dataload/ --cluster_id 0123-12334-tonedabc --recursive
+```
+
+You can also run multiple tests recursively using serverless compute:
+
+```bash
+nutter run dataload/ --serverless 1 --recursive
 ```
 
 ### Parallel Execution
@@ -352,6 +369,12 @@ The following command executes all the tests in the *dataload* folder structure,
 nutter run dataload/ --cluster_id 0123-12334-tonedabc --recursive --max_parallel_tests 2
 ```
 
+You can also run tests in parallel on serverless compute:
+
+```bash
+nutter run dataload/ --serverless 1 --recursive --max_parallel_tests 2
+```
+
 __Note:__ Running tests notebooks in parallel introduces the risk of data race conditions when two or more tests notebooks modify the same tables or files at the same time. Before increasing the level of parallelism make sure that your tests cases modify only tables or files that are used or referenced within the scope of the test notebook.
 
 ## Nutter CLI Syntax and Flags
@@ -360,28 +383,47 @@ __Note:__ Running tests notebooks in parallel introduces the risk of data race c
 
 ``` bash
 SYNOPSIS
-    nutter run TEST_PATTERN CLUSTER_ID <flags>
+    nutter run TEST_PATTERN <flags>
 
 POSITIONAL ARGUMENTS
     TEST_PATTERN
-    CLUSTER_ID
+        Type: str
+        Required: Yes
+        The pattern to match test notebooks. Can include wildcards.
 ```
 
 ```  bash
 FLAGS
+    --cluster_id           The Databricks cluster ID where tests will be executed.
+                           Must specify one of: cluster_id, cluster_name, or serverless.
+    --cluster_name         The Databricks cluster name where tests will be executed.
+                           If provided, the cluster ID will be resolved automatically.
+                           Must specify one of: cluster_id, cluster_name, or serverless.
+    --serverless           Run tests on serverless compute. Specify the environment version as an integer (e.g., 1).
+                           Must specify one of: cluster_id, cluster_name, or serverless.
     --timeout              Execution timeout in seconds. Integer value. Default is 120
     --junit_report         Create a JUnit XML report from the test results.
     --tags_report          Create a CSV report from the test results that includes the test cases tags.
     --max_parallel_tests   Sets the level of parallelism for test notebook execution.
-    --recursive            Executes all tests in the hierarchical folder structure. 
+    --recursive            Executes all tests in the hierarchical folder structure.
     --poll_wait_time       Polling interval duration for notebook status. Default is 5 (5 seconds).
-    --notebook_params      Allows parameters to be passed from the CLI tool to the test notebook. From the 
-                           notebook, these parameters can then be accessed by the notebook using 
+    --notebook_params      Allows parameters to be passed from the CLI tool to the test notebook. From the
+                           notebook, these parameters can then be accessed by the notebook using
                            the 'dbutils.widgets.get('key')' syntax.
 
 ```
 
-__Note:__ You can also use flags syntax for POSITIONAL ARGUMENTS
+__Note:__ You can specify the compute environment in multiple ways:
+
+**Using a Cluster:**
+1. As a positional argument (for backward compatibility): `nutter run test_pattern cluster-id`
+2. Using the `--cluster_id` flag: `nutter run test_pattern --cluster_id cluster-id`
+3. Using the `--cluster_name` flag: `nutter run test_pattern --cluster_name "My Cluster"`
+
+**Using Serverless Compute:**
+4. Using the `--serverless` flag: `nutter run test_pattern --serverless 1`
+
+When using `--cluster_name`, Nutter will automatically look up the cluster ID. When using `--serverless`, tests will run on Databricks serverless compute without requiring a cluster.
 
 ### List Command
 
@@ -449,7 +491,7 @@ steps:
 
 In some scenarios, the notebooks under tests must be executed in a  pre-configured test workspace, other than the development one, that contains the necessary pre-requisites such as test data, tables or mounted points. In such scenarios, you can use the pipeline to deploy the notebooks to the test workspace before executing the tests with Nutter.
 
-The following sample pipeline uses the Databricks CLI to publish the notebooks from triggering branch to the test workspace. 
+The following sample pipeline uses the Databricks CLI to publish the notebooks from triggering branch to the test workspace.
 
 
 ```yaml
@@ -515,10 +557,10 @@ pip install --force-reinstall pytest==5.0.1
 
 Creating the wheel file and manually test wheel locally
 
-1. Change directory to the root that contains setup.py
-2. Update the version in the setup.py
-3. Run the following command: python3 setup.py sdist bdist_wheel
-4. (optional) Install the wheel locally by running: python3 -m pip install <path-to-whl-file>
+1. Change directory to the root that contains `setup.py`
+2. Update the version in the `setup.py`
+3. Run the following command: `python3 setup.py sdist bdist_wheel`
+4. (optional) Install the wheel locally by running: `python3 -m pip install <path-to-whl-file>`
 
 ### Contribution Guidelines
 

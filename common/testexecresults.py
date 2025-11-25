@@ -8,7 +8,9 @@ from .resultsview import RunCommandResultsView
 from .testresult import TestResults
 
 
-class TestExecResults():
+class TestExecResults:
+    __test__ = False  # Tell pytest this is not a test class
+    
     def __init__(self, test_results):
         if not isinstance(test_results, TestResults):
             raise TypeError("test_results must be of type TestResults")
@@ -26,7 +28,8 @@ class TestExecResults():
     def exit(self, dbutils):
         dbutils.notebook.exit(self.test_results.serialize())
 
-    def get_ExecuteNotebookResult(self, notebook_path, test_results):
+    @staticmethod
+    def get_ExecuteNotebookResult(notebook_path, test_results):
         notebook_result = NotebookOutputResult(
             'N/A', None, test_results)
 
